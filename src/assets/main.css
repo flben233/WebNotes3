@@ -1,0 +1,26 @@
+/**,*/
+/**::before,*/
+/**::after {*/
+/*    box-sizing: border-box;*/
+/*    margin: 0;*/
+/*    position: relative;*/
+/*    font-weight: unset;*/
+/*}*/
+.main {
+    --theme-color: #39c5bb
+}
+/* 以下为登录、注册、重置密码所使用的样式 */
+#login {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn {
+    margin: 20px;
+}
+.input {
+    margin-bottom: 30px;
+    --va-input-min-height: 6vh;
+    width: 26vw;
+}
