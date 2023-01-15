@@ -71,7 +71,7 @@ router.beforeEach((to, from, next) => {
         next()
       } else {
         console.log(to.path)
-        if (to.path !== "/login" && to.path !== "/register" && to.path !== "/reset") {
+        if (to.path !== "/login" && to.path !== "/register" && to.path !== "/reset" && !to.path.includes("/article")) {
           next("/login");
         } else {
           next();

@@ -217,7 +217,7 @@ export default {
         share(this.aid).then((resp) => {
           if(resp.data.code === 0) {
             this.showShare = true;
-            this.message = '链接: ' + WEB_URL+'/#/article/' + this.aid;
+            this.message = '链接: ' + WEB_URL+'/article/' + this.aid;
           }else {
             this.$vaToast.init({ message: '内部错误', color: 'danger', closeable: false, duration: 3000 });
           }
