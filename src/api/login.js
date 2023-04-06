@@ -7,7 +7,7 @@ export function login(username, password, remember) {
     formData.append("remember", remember);
     axios.defaults.withCredentials = true;
     return axios({
-        url: '/api/login/',
+        url: '/api/account/login',
         method: 'post',
         data: formData
     })
@@ -16,7 +16,7 @@ export function login(username, password, remember) {
 export function logout() {
     axios.defaults.withCredentials = true;
     return axios({
-        url: '/api/logout',
+        url: '/api/account/logout',
         method: 'post',
         headers: {
             'Content-Type': "application/json;charset=utf-8",
@@ -42,7 +42,7 @@ export function register(username, password, email, code) {
     formData.append("code", code);
     axios.defaults.withCredentials = true;
     return axios({
-        url: '/api/register',
+        url: '/api/account/register',
         method: 'post',
         data: formData
     })
@@ -55,7 +55,7 @@ export function reset(email, code, password) {
     formData.append("password", password);
     axios.defaults.withCredentials= true;
     return axios({
-        url: '/api/reset',
+        url: '/api/account/reset',
         method: 'post',
         data: formData
     });

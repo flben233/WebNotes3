@@ -78,6 +78,8 @@ export default {
           this.$router.push('/login')
         }else if(resp.data.code === -1){
           this.$vaToast.init({ message: '验证码错误', color: 'error', closeable: false, duration: 3000 })
+        } else {
+          this.$vaToast.init({ message: '注册失败，用户名已存在', color: 'error', closeable: false, duration: 3000 })
         }
       })
     }

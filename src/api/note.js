@@ -1,10 +1,11 @@
 import axios from "axios";
 
-export function share(aid) {
+export function share(aid, folder) {
     var formData = new FormData();
     formData.append("aid", aid)
+    formData.append("folder", folder)
     return axios({
-        url: '/api/article/share',
+        url: '/api/article/share/enable',
         method: 'post',
         data: formData
     })
@@ -30,23 +31,6 @@ export function deleteFolder(id) {
     })
 }
 
-export function uploadImg($file){
-    var formData = new FormData();
-    formData.append('file', $file);
-    axios.defaults.withCredentials = true;
-    console.log(formData)
-    return axios({
-        url: '/api/image/upload',
-        method: 'post',
-        data: formData,
-        headers: {'Content-Type': 'multipart/form-data' }
-    })
-}
-
-export function deleteImg(start, pos) {
-    axios.defaults.withCredentials = true;
-    axios.delete(pos[0].slice(0, start) + '/delete' + pos[0].slice(start))
-}
 
 export function deleteNote(aid) {
     axios.defaults.withCredentials = true;
@@ -130,4 +114,12 @@ export function getArticleById(aid) {
         method: 'get',
         withCredentials: true
     })
+}
+
+export function getShareList() {
+    return axios.get('/api/article/share/list');
+}
+
+export function cancelShare(aid, folder) {
+    return axios.post('/api/article/share/cancel?aid=' + aid + '&folder=' + folder);
 }

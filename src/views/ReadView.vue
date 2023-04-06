@@ -6,19 +6,15 @@
     </div>
     <Divider/>
     <div id="main-read">
-      <div id="read" style="max-width: 50%; margin-left: 10%">
-        <md-editor v-model="text" previewOnly @onHtmlChanged="handler"/>
+      <div id="read" style="margin-left: 15%; max-width: 50%">
+        <md-editor :editor-id="'md-editor-v3'" v-model="text" previewOnly @onHtmlChanged="handler"/>
       </div>
-      <div style="margin-left: 70%; max-height: 95%; overflow-y: auto; padding-top: 2%; padding-bottom: 2%; position: absolute">
-        <div v-for="title in catalog" style="margin-top: 1.5vh">
-          <a :href="'#' + title.id" style="color: var(--theme-color); font-size: 2vh;" v-if="title.localName === 'h1'"> {{ title.id }}</a>
-          <a :href="'#' + title.id"
-             :style="{'color': '#303133', 'font-size': fontSize[getNum(title.localName)], 'padding-left': paddingLeft[getNum(title.localName)]}"
-             v-if="title.localName !== 'h1'">
-            {{ title.id }}
-          </a>
-          <br/>
-        </div>
+      <div style="overflow-y: auto; margin-left: 75%; max-height: 95%; padding-top: 2%; padding-bottom: 2%; position: absolute;">
+        <MdCatalog :editor-id="'md-editor-v3'"
+                   style="overflow-x: clip; text-overflow: ellipsis; max-width: 70%;"
+                   :scrollElement="scrollElement"
+                   v-if="showCatalog"
+        />
       </div>
     </div>
   </div>
@@ -31,12 +27,12 @@ import {VaIcon} from "vuestic-ui";
 import Divider from "@/components/Divider.vue";
 import {THEME_COLOR} from "@/common/final";
 
+const MdCatalog = MdEditor.MdCatalog;
 export default {
   name: "ReadView",
-  components: {Divider, VaIcon, MdEditor},
+  components: {Divider, VaIcon, MdEditor, MdCatalog},
   mounted() {
     this.getText();
-
   },
   data() {
     return {
@@ -46,6 +42,8 @@ export default {
       fontSize: ["1.8vh", "1.6vh", "1.4vh", "1.2vh", "1.0vh"],
       paddingLeft: ["0.5vw", "1.0vw", "1.5vw", "2.0vw", "2.5vw"],
       themeColor: THEME_COLOR,
+      scrollElement: null,
+      showCatalog: false,
     }
   },
   methods: {
@@ -56,8 +54,8 @@ export default {
       })
     },
     handler() {
-      this.catalog = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      console.log(this.catalog);
+      this.scrollElement = document.getElementById("read");
+      this.showCatalog = true;
     },
     getNum(tag) {
       switch (tag) {

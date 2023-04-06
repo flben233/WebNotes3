@@ -16,7 +16,7 @@ export default {
   white-space:nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0 0 20px;
 }
 </style>

@@ -42,7 +42,7 @@
       </template>
     </va-modal>
 
-    <NavBar :username="username" @click-left="sideChange" @click-logout="logoutBtn"/>
+    <NavBar :username="username" @click-left="sideChange" @click-logout="logoutBtn" @click-center="centerBtn"/>
 
     <va-progress-bar indeterminate :color="themeColor" :rounded="false" v-if="showLoading" size="small"/>
 
@@ -58,7 +58,7 @@
               @select="handleSelect"
               style="height: 6vh; padding: 20px"
           />
-          <div style="display: flex; justify-content: center; width:100%">
+          <div style="display: flex; justify-content: center; width: 100%; ">
             <va-button-group preset="secondary" :color="themeColor" id="btn-group">
               <va-button @click="showCreateFolder = !showCreateFolder" v-if="fid === 0">
                 <va-icon name="create_new_folder"/>
@@ -83,20 +83,20 @@
 <!--  列表渲染文件夹以及笔记  -->
         <div style="overflow: auto; overflow-x: hidden; max-height: 81.5vh">
           <va-card :text-color="item.color"
-                   @click="clickCard(item)"
-                   square v-for="item in items"
+                   @click="clickCard(index)"
+                   square v-for="(item, index) in items"
                    id="card">
 <!--  文件夹卡片  -->
-            <div v-if="item.folder == -1" style="display: flex; justify-items: center; justify-content: start;">
+            <div v-if="item.folder === -1" style="display: flex; justify-items: center; justify-content: start;">
               <va-icon name="folder" :color="themeColor" style="padding-top: 14px;padding-left: 20px"></va-icon>
-              <Title style="padding: 20px; font-weight: normal">{{ item.name }}</Title>
+              <Title style="padding: 20px; font-weight: normal; cursor: pointer">{{ item.name }}</Title>
             </div>
 <!--  笔记卡片  -->
-            <div v-if="item.folder != -1">
-              <Title style="padding: 20px 20px 0 20px">{{ item.article.substring(0, item.article.indexOf("\n")) }}</Title>
+            <div v-if="item.folder !== -1">
+              <Title style="padding: 20px 20px 0 20px">{{ item.article.substring(0, item.article.indexOf("\n")).replaceAll("#", "") }}</Title>
               <va-card-content style="padding-top: 10px">
-                <p style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;padding: 1px;">
-                  {{ item.article.substring(0, item.article.length > 100 ? 100 : item.article.length) + "..." }}
+                <p style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;padding: 1px; font-size: 14px; cursor:pointer">
+                  {{ item.article.substring(0, item.article.length > 100 ? 100 : item.article.length).replaceAll("#", "") + "..." }}
                 </p>
               </va-card-content>
             </div>
@@ -132,11 +132,13 @@ import {
   share,
   deleteNote,
   createFolder,
-  uploadImg, deleteFolder
+  deleteFolder
 } from "@/api/note";
+import {uploadImg} from "@/api/image"
 import {WEB_URL} from "@/common/final";
 import Title from "@/components/Title.vue";
 import NavBar from "@/components/NavBar.vue";
+
 export default {
   components: {NavBar, Title, VaInput, VaButton, VaIcon, VaCardContent, ElAutocomplete, MdEditor, Divider},
   name: "IndexView",
@@ -162,18 +164,26 @@ export default {
       folderName: '',
       themeColor: THEME_COLOR,
       delFolder: false,
+      selectIndex: -1,
     }
   },
   methods: {
     getArticles(needSelect) {
       this.showLoading = true;
-      if (this.fid == 0) {
+      if (this.fid === 0) {
         getData().then((resp) => {
           this.items = [{}];
           this.items = resp.data.data;
           if (needSelect) {
             this.aid = this.items[0].aid;
           }
+          for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i].aid != null && this.items[i].aid === this.aid) {
+              this.selectIndex = i;
+              break;
+            }
+          }
+          this.clickCard(this.selectIndex);
           this.showLoading = false;
         });
       } else {
@@ -183,6 +193,13 @@ export default {
           if (needSelect) {
             this.aid = this.items[this.items.length - 1].aid;
           }
+          for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i].aid != null && this.items[i].aid === this.aid) {
+              this.selectIndex = i;
+              break;
+            }
+          }
+          this.clickCard(this.selectIndex);
           this.showLoading = false;
         })
       }
@@ -214,7 +231,7 @@ export default {
     },
     share() {
       if(this.aid !== 0){
-        share(this.aid).then((resp) => {
+        share(this.aid, this.fid).then((resp) => {
           if(resp.data.code === 0) {
             this.showShare = true;
             this.message = '链接: ' + WEB_URL+'/article/' + this.aid;
@@ -233,6 +250,7 @@ export default {
           this.fid = 0;
           this.delFolder = false;
           this.showDelete = false;
+          this.selectIndex--;
           this.getArticles(false);
         })
       } else {
@@ -260,6 +278,7 @@ export default {
           this.$vaToast.init({ message: '创建成功', color: 'success', closeable: false, duration: 3000 });
           this.getArticles(false);
           this.showCreateFolder = false;
+          if (this.selectIndex >= 0) this.selectIndex++;
         }
       })
     },
@@ -271,24 +290,29 @@ export default {
     },
     handleSelect(item) {
       for (let item1 of this.items) {
-        if (item.aid == item1.aid) {
+        if (item.aid === item1.aid) {
           this.text = item1.article;
         }
       }
     },
-    clickCard(item) {
+    clickCard(index) {
+      let item = this.items[index];
+      if (item == null) {
+        return;
+      }
       if (this.lastCard != null) {
         this.lastCard.color = null;
       }
       item.color = this.themeColor;
       this.lastCard = item;
-      if (item.folder == -1) {
+      if (item.folder === -1) {
         // 如果是文件夹就根据文件夹ID向后端请求内容，然后刷新items
         this.fid = item.id;
         this.getArticles(false);
       } else {
         this.text = item.article;
         this.aid = item.aid;
+        this.selectIndex = index;
       }
     },
     sideChange() {
@@ -299,6 +323,10 @@ export default {
         this.$vaToast.init({ message: '退出成功', color: 'success', closeable: false, duration: 3000 });
         location.reload();
       })
+    },
+    centerBtn() {
+      this.showLoading = true;
+      this.$router.push("/center")
     }
   }
 }
