@@ -1,17 +1,28 @@
 <template>
   <div>
-    <div style="padding: 0.5%; height: 5%; display: flex; align-items: center">
-      <va-icon name="person"/>
-      {{ username }}
+    <div style="padding: 0.5%; height: 5vh; display: flex; align-items: center; justify-content: space-between">
+      <div>
+        <va-icon name="person"/>
+        {{ username }}
+      </div>
+      <va-button id="catalog-btn" preset="secondary" color="#39c5bb" @click="showMobileCatalog = !showMobileCatalog">
+        <va-icon name="menu"/>
+      </va-button>
     </div>
     <Divider/>
+    <div v-if="showMobileCatalog" style="max-height: 91vh; overflow-y: auto; margin: 2vh;">
+      <MdCatalog :editor-id="'md-editor-v3'"
+                 style="text-overflow: ellipsis;"
+                 :scrollElement="scrollElement"
+      />
+    </div>
     <div id="main-read">
-      <div id="read" style="margin-left: 15%; max-width: 50%">
+      <div id="read" style="">
         <md-editor :editor-id="'md-editor-v3'" v-model="text" previewOnly @onHtmlChanged="handler"/>
       </div>
-      <div style="overflow-y: auto; margin-left: 75%; max-height: 95%; padding-top: 2%; padding-bottom: 2%; position: absolute;">
+      <div id="catalog">
         <MdCatalog :editor-id="'md-editor-v3'"
-                   style="overflow-x: clip; text-overflow: ellipsis; max-width: 70%;"
+                   style="text-overflow: ellipsis; max-width: 25%;"
                    :scrollElement="scrollElement"
                    v-if="showCatalog"
         />
@@ -44,6 +55,7 @@ export default {
       themeColor: THEME_COLOR,
       scrollElement: null,
       showCatalog: false,
+      showMobileCatalog: false
     }
   },
   methods: {
@@ -59,11 +71,16 @@ export default {
     },
     getNum(tag) {
       switch (tag) {
-        case "h2": return 0;
-        case "h3": return 1;
-        case "h4": return 2;
-        case "h5": return 3;
-        case "h6": return 4;
+        case "h2":
+          return 0;
+        case "h3":
+          return 1;
+        case "h4":
+          return 2;
+        case "h5":
+          return 3;
+        case "h6":
+          return 4;
       }
     }
   }
@@ -71,13 +88,44 @@ export default {
 </script>
 
 <style scoped>
-  #read {
-    position: absolute;
-    overflow-y: auto;
-    padding: 2%;
-    max-height: 95%;
+@media screen and (max-width: 1024px) {
+  ::-webkit-scrollbar {
+    display: none;
   }
-  #main-read {
-    display: flex;
+}
+
+#read {
+  position: absolute;
+  overflow-y: auto;
+  padding: 2%;
+  max-height: 95%;
+  margin-left: 15%;
+  max-width: 60%;
+  @media screen and (max-width: 1024px) {
+    max-width: 90%;
+    margin-left: 5%;
   }
+}
+
+#main-read {
+  display: flex;
+}
+
+#catalog {
+  overflow-y: auto;
+  margin-left: 80%;
+  max-height: 95%;
+  padding-top: 2%;
+  padding-bottom: 2%;
+  position: absolute;
+  @media screen and (max-width: 1024px) {
+    display: none;
+  }
+}
+
+#catalog-btn {
+  @media screen and (min-width: 1024px) {
+    display: none;
+  }
+}
 </style>

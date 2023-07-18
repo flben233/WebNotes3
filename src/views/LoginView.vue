@@ -1,53 +1,48 @@
 <template>
-  <div id="login">
-      <va-card style="padding: 20px">
-        <div style="display: flex; flex-flow: column;">
-          <p style="font-size: xx-large; font-weight: lighter; margin-bottom: 20px">登录</p>
-          <va-form
-              style="display: flex; flex-flow: column;"
-              tag="form"
-              @submit.prevent="loginBtn"
-          >
-            <va-input
-                placeholder="用户名"
-                v-model="username"
-                class="input"
-                :color="themeColor"
-            />
-            <va-input
-                type="password"
-                placeholder="密码"
-                v-model="password"
-                class="input"
-                :color="themeColor"
-            />
-            <va-switch v-model="remember" :color="themeColor" label="记住我" left-label size="small" style="align-self: center"/>
-            <br/>
-            <va-button type="submit" class="btn" :color="themeColor">
-              登录
-            </va-button>
-          </va-form>
-          <br/>
-          <div style="align-self: center">
-            <va-button @click="$router.push('/register')" preset="secondary" style="padding: 0" :color="themeColor">
-              注册
-            </va-button>
-            <va-button preset="secondary" @click="$router.push('/reset')" :color="themeColor">
-              忘记密码
-            </va-button>
-          </div>
-          <va-progress-bar indeterminate :color="themeColor" :rounded="false" v-if="showLoading" size="small"/>
-        </div>
-      </va-card>
+  <div class="base-container row">
+    <div id="login-card" class="flex flex-col md5 lg3 sm12">
+      <p style="font-size: xx-large; font-weight: lighter; margin-bottom: 1.5rem">登录</p>
+      <va-input
+          placeholder="用户名"
+          v-model="username"
+          class="input"
+          :color="themeColor"
+      />
+      <va-input
+          type="password"
+          placeholder="密码"
+          v-model="password"
+          class="input"
+          :color="themeColor"
+      />
+      <div style="min-width: 100%; display: flex; justify-content: center">
+        <va-switch
+            v-model="remember"
+            :color="themeColor"
+            label="记住我"
+            left-label
+            size="small"
+        />
+      </div>
+      <va-button :color="themeColor" @click="loginBtn" style="min-width: 100%; margin-top: 15px; margin-bottom: 15px" :loading="showLoading">
+        登录
+      </va-button>
+      <div style="display: flex; justify-content: center;">
+        <va-button @click="$router.push('/register')" preset="secondary" :color="themeColor">
+          注册
+        </va-button>
+        <va-button preset="secondary" @click="$router.push('/reset')" :color="themeColor">
+          忘记密码
+        </va-button>
+      </div>
+    </div>
   </div>
 </template>
 <script>
-import {VaCard, VaForm} from "vuestic-ui";
 import {login} from "@/api/login"
 import {THEME_COLOR} from "@/common/final";
 
 export default {
-  components: {VaForm, VaCard},
   data() {
     return {
       username: "",
@@ -64,12 +59,12 @@ export default {
         if (resp.data.code === 0) {
           localStorage.setItem("username", this.username);
           this.$router.push("/");
-          this.$vaToast.init({ message: '登录成功', color: 'success', closeable: false, duration: 3000 })
+          this.$vaToast.init({message: '登录成功', color: 'success', closeable: false, duration: 3000})
         } else if (resp.data.code === -2) {
-          this.$vaToast.init({ message: '账号或密码错误', color: 'danger', closeable: false, duration: 3000 })
+          this.$vaToast.init({message: '账号或密码错误', color: 'danger', closeable: false, duration: 3000})
           this.showLoading = false;
         } else {
-          this.$vaToast.init({ message: '登录失败', color: 'danger', closeable: false, duration: 3000 })
+          this.$vaToast.init({message: '登录失败', color: 'danger', closeable: false, duration: 3000})
           this.showLoading = false;
         }
       });
@@ -78,5 +73,12 @@ export default {
 }
 </script>
 <style scoped>
-
+#login-card {
+  @media screen and (min-width: 768px) {
+    box-shadow: 3px 3px 10px #b8b8b8;
+    border-radius: 1rem;
+  }
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
 </style>
