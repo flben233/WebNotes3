@@ -75,7 +75,7 @@
             <va-button @click="share" size="small" :color="themeColor" preset="secondary">
               <va-icon name="share"/>
             </va-button>
-            <va-switch v-model="previewOnly" @click="refreshEditor" :color="themeColor">
+            <va-switch v-if="showSwitch" v-model="previewOnly" @click="refreshEditor" :color="themeColor">
               <template #innerLabel>
                 <va-icon name="visibility" :color="themeColor"/>
               </template>
@@ -177,6 +177,7 @@ export default {
       previewOnly: false,
       preview: false,
       showEditor: true,
+      showSwitch: false,
       sideBar: {
         width: "25vw",
         marginTop: "2vh",
@@ -366,6 +367,7 @@ export default {
     },
     setSideSize() {
       if (innerWidth < 1024) {
+        this.showSwitch = true;
         this.sideBar.width = "96vw";
         this.sideBar.marginLeft = "2vw";
         this.editorStyle = JSON.stringify(this.editor);
@@ -378,7 +380,9 @@ export default {
     },
     refreshEditor() {
       this.showEditor = false;
-      this.preview = this.previewOnly;
+      if (innerWidth < 1024) {
+        this.preview = this.previewOnly;
+      }
       this.$nextTick(() => {
         this.showEditor = true;
       })
