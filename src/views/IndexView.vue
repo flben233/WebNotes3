@@ -87,7 +87,7 @@
         <div style="overflow: hidden; ">
           <div style="overflow: scroll; overflow-x: hidden; max-height: 76vh;">
             <va-card :text-color="item.color"
-                     @click="clickCard(index)"
+                     @click="clickCard(item)"
                      square v-for="(item, index) in items"
                      id="card">
               <!--  文件夹卡片  -->
@@ -154,6 +154,7 @@ export default {
     this.username = localStorage.getItem("username");
     this.getArticles();
     this.setSideSize();
+    window.onresize = this.setSideSize;
   },
   data() {
     return {
@@ -173,7 +174,7 @@ export default {
       folderName: '',
       themeColor: THEME_COLOR,
       delFolder: false,
-      selectIndex: -1,
+      selectedItem: null,
       previewOnly: false,
       preview: false,
       showEditor: true,
@@ -201,14 +202,14 @@ export default {
           this.items = resp.data.data;
           if (needSelect) {
             this.aid = this.items[0].aid;
+            this.clickCard(this.items[0]);
           }
-          for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].aid != null && this.items[i].aid === this.aid) {
-              this.selectIndex = i;
-              break;
+          for (let item of this.items) {
+            if (item.aid === this.aid) {
+              item.color = this.themeColor;
+              this.lastCard = item;
             }
           }
-          this.clickCard(this.selectIndex);
           this.showLoading = false;
         });
       } else {
@@ -217,14 +218,14 @@ export default {
           this.items.unshift({folder: -1, name: "..", id: 0})
           if (needSelect) {
             this.aid = this.items[this.items.length - 1].aid;
+            this.selectedItem = this.items[this.items.length - 1];
           }
-          for (let i = 0; i < this.items.length; i++) {
-            if (this.items[i].aid != null && this.items[i].aid === this.aid) {
-              this.selectIndex = i;
-              break;
+          for (let item of this.items) {
+            if (item.aid === this.aid) {
+              item.color = this.themeColor;
+              this.lastCard = item;
             }
           }
-          this.clickCard(this.selectIndex);
           this.showLoading = false;
         })
       }
@@ -275,7 +276,6 @@ export default {
           this.fid = 0;
           this.delFolder = false;
           this.showDelete = false;
-          this.selectIndex--;
           this.getArticles(false);
         })
       } else {
@@ -303,7 +303,6 @@ export default {
           this.$vaToast.init({message: '创建成功', color: 'success', closeable: false, duration: 3000});
           this.getArticles(false);
           this.showCreateFolder = false;
-          if (this.selectIndex >= 0) this.selectIndex++;
         }
       })
     },
@@ -320,24 +319,20 @@ export default {
         }
       }
     },
-    clickCard(index) {
-      let item = this.items[index];
-      if (item == null) {
-        return;
-      }
-      if (this.lastCard != null) {
-        this.lastCard.color = null;
-      }
-      item.color = this.themeColor;
-      this.lastCard = item;
+    clickCard(item) {
       if (item.folder === -1) {
         // 如果是文件夹就根据文件夹ID向后端请求内容，然后刷新items
         this.fid = item.id;
         this.getArticles(false);
       } else {
+        if (this.lastCard != null) {
+          this.lastCard.color = null;
+        }
+        item.color = this.themeColor;
+        this.lastCard = item;
         this.text = item.article;
         this.aid = item.aid;
-        this.selectIndex = index;
+        this.selectedItem = item;
         if (innerWidth < 1024) {
           this.sideChange();
         }

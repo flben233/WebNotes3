@@ -32,7 +32,31 @@
 }
 
 .va-modal--mobile-fullscreen {
-    min-width: 75vw !important;
+    min-width: 0 !important;
     min-height: 0 !important;
     border-radius: 0.5rem;
+}
+
+h1 {
+    font-size: 2em; !important;
+}
+
+h2 {
+    font-size: 1.5em !important;
+}
+
+h3 {
+    font-size: 1.17em !important;
+}
+
+h4 {
+    font-size: 16px !important;
+}
+
+h5 {
+    font-size: 0.83em !important;
+}
+
+h6 {
+    font-size: 0.67em !important;
 }
