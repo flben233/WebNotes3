@@ -441,6 +441,9 @@ export default {
 }
 
 #editor {
+  @media screen and (max-width: 1024px) {
+    padding: 10px;
+  }
   transition: all 0.5s;
 }
 
