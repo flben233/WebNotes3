@@ -60,3 +60,15 @@ export function reset(email, code, password) {
         data: formData
     });
 }
+
+export function check() {
+    return axios({
+        url: '/api/account/check',
+        method: 'get',
+        headers: {
+            'Content-Type': "application/json;charset=utf-8",
+            'Access-Control-Allow-Credentials':"true"
+        },
+        withCredentials: true
+    })
+}

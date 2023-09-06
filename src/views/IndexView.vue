@@ -13,32 +13,7 @@
         <va-button preset="secondary" :color="themeColor" @click="showCreateFolder = false">
           关闭
         </va-button>
-      </template>
-    </va-modal>
-    <!--  显示分享笔记的链接的窗口  -->
-    <va-modal v-model="showShare" hide-default-actions>
-      <template #header>
-        <Title>分享</Title>
-      </template>
-      <div>{{ message }}</div>
-      <template #footer>
-        <va-button :color="themeColor" text-color="#ffffff" @click="showShare = false">
-          关闭
-        </va-button>
-      </template>
-    </va-modal>
-    <!--  删除笔记/文件夹的窗口  -->
-    <va-modal v-model="showDelete" hide-default-actions>
-      <template #header>
-        <Title style="text-align: center">确定要删除吗</Title>
-      </template>
-      <template #footer>
-        <va-button :color="themeColor" text-color="#ffffff" @click="del" style="margin-right: 10px">
-          删除
-        </va-button>
-        <va-button preset="secondary" :color="themeColor" @click="showDelete = false">
-          取消
-        </va-button>
+        npm run
       </template>
     </va-modal>
 
@@ -50,7 +25,7 @@
       <!--   显示笔记以及文件夹的侧边栏   -->
       <div :style="sideBar" id="side">
         <div style="display: flex; flex-flow: column; height: 12vh; background-color: white;
-                    border-radius: 1rem; padding: 1.2vh; margin-bottom: 2vh; justify-content: space-between; overflow: clip">
+                    border-radius: 1rem; padding: 1.2vh; margin-bottom: 1vh; justify-content: space-between; overflow: clip">
           <el-autocomplete
               v-model="input"
               :fetch-suggestions="querySearchAsync"
@@ -69,12 +44,6 @@
             <va-button @click="clearText" size="small" :color="themeColor" preset="secondary">
               <va-icon name="create"/>
             </va-button>
-            <va-button @click="showDelete = (aid !== 0)" size="small" :color="themeColor" preset="secondary">
-              <va-icon name="delete"/>
-            </va-button>
-            <va-button @click="share" size="small" :color="themeColor" preset="secondary">
-              <va-icon name="share"/>
-            </va-button>
             <va-switch v-if="showSwitch" v-model="previewOnly" @click="refreshEditor" :color="themeColor">
               <template #innerLabel>
                 <va-icon name="visibility" :color="themeColor"/>
@@ -83,41 +52,28 @@
           </div>
         </div>
 
-        <!--  列表渲染文件夹以及笔记  -->
-        <div style="overflow: hidden; ">
-          <div style="overflow: scroll; overflow-x: hidden; max-height: 76vh;">
-            <va-card :text-color="item.color"
-                     @click="clickCard(item)"
-                     square v-for="(item, index) in items"
-                     id="card">
-              <!--  文件夹卡片  -->
-              <div v-if="item.folder === -1" style="display: flex; justify-items: center; justify-content: start;">
-                <va-icon name="folder" :color="themeColor" style="padding-top: 14px;padding-left: 20px"></va-icon>
-                <Title style="padding: 20px; font-weight: normal; cursor: pointer">{{ item.name }}</Title>
-              </div>
-              <!--  笔记卡片  -->
-              <div v-if="item.folder !== -1">
-                <Title style="padding: 20px 20px 0 20px">{{ item.article.substring(0,
-                  item.article.indexOf("\n")).replaceAll("#", "") }}</Title>
-                <va-card-content style="padding-top: 10px">
-                  <p style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;padding: 1px; font-size: 14px; cursor:pointer">
-                    {{
-                      item.article.substring(0, item.article.length > 100 ? 100 : item.article.length).replaceAll("#", "") + "..."
-                    }}
-                  </p>
-                </va-card-content>
-              </div>
-            </va-card>
+        <div style="overflow: hidden; max-height: 77vh">
+          <!--    列表渲染文件夹    -->
+          <div style="overflow: auto; margin-bottom: 1vh; height: 3vh; display: flex; align-items: center">
+            <va-chip size="small" :style="{marginRight: '5px', transform: 'scale(' + (pageHeight * 0.03 / 28.0).toString() + ')'}"
+                     v-for="(item, index) in folders" @click="selectFolder(item.id)" :color="themeColor" outline>
+              {{ item.name }}
+            </va-chip>
+          </div>
+          <!--  列表渲染笔记  -->
+          <div style="overflow: scroll; overflow-x: hidden; max-height: 73vh;">
+            <NoteCard v-for="(item, index) in items" :item="item" :folders="folders" @click="clickCard(item)"
+                      @start="start" @finish="finish"/>
           </div>
         </div>
       </div>
 
       <div class="mar"/>
       <!--   编辑器   -->
-      <md-editor v-if="showEditor" v-model="text" id="editor" @onSave="save" @onUploadImg="imgAdd" :style="editor"
+      <md-editor ref="editor" v-if="showEditor" v-model="text" id="editor" :style="editor"
+                 @onSave="save" @onUploadImg="imgAdd" @onHtmlChanged="onHtmlChange" @onChange="modified = true"
                  :preview-only="previewOnly" :preview="preview"/>
     </div>
-
   </div>
 
 </template>
@@ -134,43 +90,45 @@ import {logout} from "@/api/login"
 import {
   search,
   getData,
-  searchByFolder,
   createNote,
-  updateNotes,
-  share,
-  deleteNote,
-  createFolder,
-  deleteFolder
+  updateNotes
 } from "@/api/note";
+import {allFolder, createFolder} from "@/api/folder";
 import {uploadImg} from "@/api/image"
-import {WEB_URL} from "@/common/final";
 import Title from "@/components/Title.vue";
 import NavBar from "@/components/NavBar.vue";
+import NoteCard from "@/components/NoteCard.vue";
 
 export default {
-  components: {NavBar, Title, VaInput, VaButton, VaIcon, VaCardContent, ElAutocomplete, MdEditor, Divider},
+  components: {NoteCard, NavBar, Title, VaInput, VaButton, VaIcon, VaCardContent, ElAutocomplete, MdEditor, Divider},
   name: "IndexView",
   mounted() {
     this.username = localStorage.getItem("username");
     this.getArticles();
     this.setSideSize();
-    window.onresize = this.setSideSize;
+    this.$refs.editor.on("preview", this.onHtmlChange);
+    window.addEventListener("beforeunload", (e) => {
+      if (this.modified) {
+        e.preventDefault();
+        e.returnValue = ""
+        return "";
+      }
+    });
   },
   data() {
     return {
       minimized: false,
-      items: [{article: "\n", aid: 1, folder: 0}],
+      items: [],
+      articles: [],
+      folders: [],
       input: '',
       text: '',
       lastCard: null,
       username: '',
       aid: 0,
       fid: 0,
-      showShare: false,
-      showDelete: false,
       showCreateFolder: false,
       showLoading: false,
-      message: '',
       folderName: '',
       themeColor: THEME_COLOR,
       delFolder: false,
@@ -179,56 +137,83 @@ export default {
       preview: false,
       showEditor: true,
       showSwitch: false,
+      pageHeight: innerHeight,
+      modified: false,
       sideBar: {
         width: "25vw",
         marginTop: "2vh",
         marginLeft: "1vw"
       },
+      sideBarMin: {
+        width: "0",
+        marginLeft: "0",
+        marginTop: "2vh",
+        height: "100%"
+      },
+      sideBarMobile: {
+        marginTop: "2vh",
+        width: "96vw",
+        marginLeft: "2vw"
+      },
       editor: {
         height: "90vh",
         border: "transparent",
         marginTop: "2vh",
-        marginRight: "2vw",
+        marginRight: "1vw",
         borderRadius: "1rem"
+      },
+      editorMin: {
+        width: "0",
+        marginRight: "0",
+        padding: "0",
+        marginTop: "2vh",
+        height: "90vh"
       }
     }
   },
   methods: {
-    getArticles(needSelect) {
+    getArticles(callback = ()=>{}) {
       this.showLoading = true;
-      if (this.fid === 0) {
-        getData().then((resp) => {
-          this.items = [{}];
-          this.items = resp.data.data;
-          if (needSelect) {
-            this.aid = this.items[0].aid;
-            this.clickCard(this.items[0]);
+      getData().then((resp) => {
+        this.articles = resp.data.data;
+        for (let item of this.articles) {
+          if (item.aid === this.aid) {
+            item.color = this.themeColor;
+            this.lastCard = item;
           }
-          for (let item of this.items) {
-            if (item.aid === this.aid) {
-              item.color = this.themeColor;
-              this.lastCard = item;
-            }
-          }
-          this.showLoading = false;
-        });
-      } else {
-        searchByFolder(this.fid).then((resp) => {
-          this.items = resp.data.data;
-          this.items.unshift({folder: -1, name: "..", id: 0})
-          if (needSelect) {
-            this.aid = this.items[this.items.length - 1].aid;
-            this.selectedItem = this.items[this.items.length - 1];
-          }
-          for (let item of this.items) {
-            if (item.aid === this.aid) {
-              item.color = this.themeColor;
-              this.lastCard = item;
-            }
-          }
-          this.showLoading = false;
-        })
+        }
+        this.getFolders();
+        callback()
+        this.showLoading = false;
+      });
+    },
+    getFolders() {
+      allFolder().then((resp) => {
+        this.folders = [{name: "/", id: 0}]
+        for (let folder of resp.data.data) {
+          this.folders.push(folder);
+        }
+        this.articleFilter();
+      })
+    },
+    articleFilter() {
+      this.items = []
+      for (let item of this.articles) {
+        if (item.folder === this.fid) {
+          this.items.push(item);
+        }
       }
+    },
+    selectFolder(folder) {
+      this.fid = folder;
+      this.articleFilter();
+    },
+    start() {
+      this.showLoading = true;
+    },
+    finish() {
+      this.showLoading = false;
+      this.getArticles();
     },
     clearText() {
       this.text = "";
@@ -246,46 +231,17 @@ export default {
     create() {
       createNote(this.text, this.fid).then(() => {
         this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
-        this.getArticles(true);
+        this.getArticles(() => {
+          this.aid = this.items[0].aid;
+          this.clickCard(this.items[0]);
+        });
       })
     },
     update() {
       updateNotes(this.text, this.aid, this.fid).then(() => {
         this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
-        this.getArticles(false);
+        this.getArticles();
       })
-    },
-    share() {
-      if (this.aid !== 0) {
-        share(this.aid, this.fid).then((resp) => {
-          if (resp.data.code === 0) {
-            this.showShare = true;
-            this.message = '链接: ' + WEB_URL + '/article/' + this.aid;
-          } else {
-            this.$vaToast.init({message: '内部错误', color: 'danger', closeable: false, duration: 3000});
-          }
-        })
-      }
-    },
-    del() {
-      this.showLoading = true;
-      if (this.delFolder) {
-        deleteFolder(this.fid).then(() => {
-          this.$vaToast.init({message: '删除成功', color: 'success', closeable: false, duration: 3000});
-          this.showLoading = false;
-          this.fid = 0;
-          this.delFolder = false;
-          this.showDelete = false;
-          this.getArticles(false);
-        })
-      } else {
-        deleteNote(this.aid).then(() => {
-          this.$vaToast.init({message: '删除成功', color: 'success', closeable: false, duration: 3000});
-          this.showDelete = false;
-          this.aid = 0;
-          this.getArticles(false);
-        })
-      }
     },
     imgAdd(files, callback) {
       this.showLoading = true;
@@ -301,7 +257,7 @@ export default {
       createFolder(this.folderName).then((resp) => {
         if (resp.data.code === 0) {
           this.$vaToast.init({message: '创建成功', color: 'success', closeable: false, duration: 3000});
-          this.getArticles(false);
+          this.getArticles();
           this.showCreateFolder = false;
         }
       })
@@ -320,34 +276,27 @@ export default {
       }
     },
     clickCard(item) {
-      if (item.folder === -1) {
-        // 如果是文件夹就根据文件夹ID向后端请求内容，然后刷新items
-        this.fid = item.id;
-        this.getArticles(false);
-      } else {
-        if (this.lastCard != null) {
-          this.lastCard.color = null;
-        }
-        item.color = this.themeColor;
-        this.lastCard = item;
-        this.text = item.article;
-        this.aid = item.aid;
-        this.selectedItem = item;
-        if (innerWidth < 1024) {
-          this.sideChange();
-        }
+      if (this.lastCard != null) {
+        this.lastCard.color = null;
+      }
+      item.color = this.themeColor;
+      this.lastCard = item;
+      this.text = item.article;
+      this.aid = item.aid;
+      this.selectedItem = item;
+      if (innerWidth < 1024) {
+        this.sideChange();
       }
     },
     sideChange() {
       this.minimized = !this.minimized;
       if (this.minimized) {
-        this.sideBarStyle = JSON.stringify(this.sideBar);
-        this.sideBar.width = "0";
-        this.sideBar.marginLeft = "0";
+        this.sideBar = this.sideBarMin;
         this.editor = JSON.parse(this.editorStyle);
       } else {
         this.sideBar = JSON.parse(this.sideBarStyle);
-        this.setSideSize();
+        if (innerWidth < 1024)
+          this.editor = this.editorMin;
       }
     },
     logoutBtn() {
@@ -363,12 +312,13 @@ export default {
     setSideSize() {
       if (innerWidth < 1024) {
         this.showSwitch = true;
-        this.sideBar.width = "96vw";
-        this.sideBar.marginLeft = "2vw";
+        this.sideBar = this.sideBarMobile;
         this.editorStyle = JSON.stringify(this.editor);
-        this.editor.width = "0";
-        this.editor.marginRight = "0";
+        this.sideBarStyle = JSON.stringify(this.sideBar);
+        this.editor = this.editorMin;
       } else {
+        this.editorStyle = JSON.stringify(this.editor);
+        this.sideBarStyle = JSON.stringify(this.sideBar);
         this.preview = true;
         this.refreshEditor();
       }
@@ -380,6 +330,23 @@ export default {
       }
       this.$nextTick(() => {
         this.showEditor = true;
+      })
+    },
+    onHtmlChange() {
+      this.$nextTick(() => {
+        let elements = document.getElementsByTagName("img");
+        // 停止所有已发出的img请求
+        if (elements.length > 0) {
+          window.stop();
+        }
+        for (let element of elements) {
+          element.setAttribute("loading", "lazy");
+          // 刷新img
+          element.setAttribute("src", element.src);
+        }
+        // 更新深色模式
+        window.dispatchEvent(new Event("darkMode"));
+        this.$forceUpdate();
       })
     }
   }
@@ -408,14 +375,6 @@ export default {
   width: 100vw;
   max-width: 100vw;
   height: 100vh;
-  background-color: #f6f6f6;
-}
-
-#card {
-  --va-card-border-radius: 0;
-  --va-card-box-shadow: none;
-  border-radius: 1rem;
-  margin-bottom: 2%;
 }
 
 .el-input {

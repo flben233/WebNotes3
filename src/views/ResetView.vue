@@ -1,5 +1,5 @@
 <template>
-  <div id="login">
+  <div class="base-container">
     <va-card style="padding: 20px">
       <div style="display: flex; flex-flow: column;">
         <p style="font-size: xx-large; font-weight: lighter; margin-bottom: 20px">重置密码</p>

@@ -1,13 +1,16 @@
 <template>
-  <div>
+  <div style="background-color: white; height: 100vh; width: 100vw;">
     <div style="padding: 0.5%; height: 5vh; display: flex; align-items: center; justify-content: space-between">
       <div>
         <va-icon name="person"/>
         {{ username }}
       </div>
-      <va-button id="catalog-btn" preset="secondary" color="#39c5bb" @click="showMobileCatalog = !showMobileCatalog">
-        <va-icon name="menu"/>
-      </va-button>
+      <div style="display: flex; align-items: center">
+        <DarkModeButton/>
+        <va-button id="catalog-btn" preset="secondary" color="#39c5bb" @click="showMobileCatalog = !showMobileCatalog">
+          <va-icon name="menu"/>
+        </va-button>
+      </div>
     </div>
     <Divider/>
     <div v-if="showMobileCatalog" style="max-height: 91vh; overflow-y: auto; margin: 2vh;">
@@ -17,12 +20,11 @@
       />
     </div>
     <div id="main-read">
-      <div id="read" style="">
-        <md-editor :editor-id="'md-editor-v3'" v-model="text" previewOnly @onHtmlChanged="handler"/>
-      </div>
+      <md-editor ref="reader"
+          id="read" :editor-id="'md-editor-v3'" v-model="text" previewOnly @onHtmlChanged="handler"/>
       <div id="catalog">
         <MdCatalog :editor-id="'md-editor-v3'"
-                   style="text-overflow: ellipsis; max-width: 25%;"
+                   style="text-overflow: ellipsis; max-width: 100%;"
                    :scrollElement="scrollElement"
                    v-if="showCatalog"
         />
@@ -37,11 +39,12 @@ import MdEditor from "md-editor-v3";
 import {VaIcon} from "vuestic-ui";
 import Divider from "@/components/Divider.vue";
 import {THEME_COLOR} from "@/common/final";
+import DarkModeButton from "@/components/DarkModeButton.vue";
 
 const MdCatalog = MdEditor.MdCatalog;
 export default {
   name: "ReadView",
-  components: {Divider, VaIcon, MdEditor, MdCatalog},
+  components: {DarkModeButton, Divider, VaIcon, MdEditor, MdCatalog},
   mounted() {
     this.getText();
   },
@@ -55,7 +58,7 @@ export default {
       themeColor: THEME_COLOR,
       scrollElement: null,
       showCatalog: false,
-      showMobileCatalog: false
+      showMobileCatalog: false,
     }
   },
   methods: {
@@ -68,6 +71,21 @@ export default {
     handler() {
       this.scrollElement = document.getElementById("read");
       this.showCatalog = true;
+      this.$nextTick(() => {
+        let elements = document.getElementsByTagName("img");
+        // 停止所有已发出的img请求
+        if (elements.length > 0) {
+          window.stop();
+        }
+        for (let element of elements) {
+          element.setAttribute("loading", "lazy");
+          // 刷新img
+          element.setAttribute("src", element.src);
+        }
+        // 更新深色模式
+        window.dispatchEvent(new Event("darkMode"));
+        this.$forceUpdate();
+      })
     },
     getNum(tag) {
       switch (tag) {
@@ -97,12 +115,12 @@ export default {
 #read {
   position: absolute;
   overflow-y: auto;
-  padding: 2%;
+  width: 60vw;
+  padding: 5vw;
   max-height: 95%;
-  margin-left: 15%;
-  max-width: 60%;
+  margin-left: 10%;
   @media screen and (max-width: 1024px) {
-    max-width: 90%;
+    width: 90vw;
     margin-left: 5%;
   }
 }
@@ -113,8 +131,9 @@ export default {
 
 #catalog {
   overflow-y: auto;
-  margin-left: 80%;
+  margin-left: 75%;
   max-height: 95%;
+  width: 20vw;
   padding-top: 2%;
   padding-bottom: 2%;
   position: absolute;

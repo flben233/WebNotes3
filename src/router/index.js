@@ -6,6 +6,7 @@ import ResetView from "../views/ResetView.vue";
 import CenterView from "../views/CenterView.vue";
 import axios from "axios";
 import ReadView from "@/views/ReadView.vue";
+import {check} from "@/api/login";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,15 +45,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    axios({
-      url: '/api/article/user/',
-      method: 'get',
-      headers: {
-        'Content-Type': "application/json;charset=utf-8",
-        'Access-Control-Allow-Credentials':"true"
-      },
-      withCredentials: true
-    }).then(function (response){
+  check().then(function (response){
       if (response.data.code === 0) {
         next()
       } else {

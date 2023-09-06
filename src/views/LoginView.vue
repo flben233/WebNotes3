@@ -75,9 +75,9 @@ export default {
 <style scoped>
 #login-card {
   @media screen and (min-width: 768px) {
-    box-shadow: 3px 3px 10px #b8b8b8;
     border-radius: 1rem;
   }
+  background-color: white;
   padding: 1.5rem;
   border-radius: 1rem;
 }

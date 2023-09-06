@@ -18,6 +18,7 @@
           个人中心
         </va-button>
         <br/>
+        <DarkModeButton/>
         <va-button preset="secondary" color="#000000" style="font-weight: normal;" @click="$emit('click-logout')">
           退出登录
         </va-button>
@@ -27,8 +28,11 @@
 </template>
 
 <script>
+import DarkModeButton from "@/components/DarkModeButton.vue";
+
 export default {
   name: "NavBar",
+  components: {DarkModeButton},
   props: ['username'],
   emits: ['click-left', 'click-logout', 'click-center']
 }

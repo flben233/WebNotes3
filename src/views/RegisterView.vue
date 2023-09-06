@@ -1,5 +1,5 @@
 <template>
-  <div id="login">
+  <div class="base-container">
     <va-card style="padding: 20px">
       <div style="display: flex; flex-flow: column;">
         <p style="font-size: xx-large; font-weight: lighter; margin-bottom: 20px">注册</p>
@@ -44,7 +44,7 @@
 <script>
 import { VaCard } from "vuestic-ui";
 import {THEME_COLOR} from "@/common/final";
-import {code, register} from "../api/login";
+import {code, register} from "@/api/login";
 export default {
   components: {VaCard},
   data() {
