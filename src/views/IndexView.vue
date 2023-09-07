@@ -37,13 +37,10 @@
                        preset="secondary">
               <va-icon name="create_new_folder"/>
             </va-button>
-            <va-button @click="showDelete = (fid !== 0); delFolder = true;" v-if="fid !== 0" size="small"
-                       :color="themeColor" preset="secondary">
-              <va-icon name="folder_delete"/>
-            </va-button>
             <va-button @click="clearText" size="small" :color="themeColor" preset="secondary">
               <va-icon name="create"/>
             </va-button>
+            <DarkModeButton/>
             <va-switch v-if="showSwitch" v-model="previewOnly" @click="refreshEditor" :color="themeColor">
               <template #innerLabel>
                 <va-icon name="visibility" :color="themeColor"/>
@@ -55,10 +52,8 @@
         <div style="overflow: hidden; max-height: 77vh">
           <!--    列表渲染文件夹    -->
           <div style="overflow: auto; margin-bottom: 1vh; height: 3vh; display: flex; align-items: center">
-            <va-chip size="small" :style="{marginRight: '5px', transform: 'scale(' + (pageHeight * 0.03 / 28.0).toString() + ')'}"
-                     v-for="(item, index) in folders" @click="selectFolder(item.id)" :color="themeColor" outline>
-              {{ item.name }}
-            </va-chip>
+            <FolderChip v-for="(item, index) in folders" @click="selectFolder(item.id)" :item="item" @start="start"
+                        @finish="folderFinish"/>
           </div>
           <!--  列表渲染笔记  -->
           <div style="overflow: scroll; overflow-x: hidden; max-height: 73vh;">
@@ -98,9 +93,15 @@ import {uploadImg} from "@/api/image"
 import Title from "@/components/Title.vue";
 import NavBar from "@/components/NavBar.vue";
 import NoteCard from "@/components/NoteCard.vue";
+import FolderChip from "@/components/FolderChip.vue";
+import DarkModeButton from "@/components/DarkModeButton.vue";
 
 export default {
-  components: {NoteCard, NavBar, Title, VaInput, VaButton, VaIcon, VaCardContent, ElAutocomplete, MdEditor, Divider},
+  components: {
+    DarkModeButton,
+    FolderChip,
+    NoteCard, NavBar, Title, VaInput, VaButton, VaIcon, VaCardContent, ElAutocomplete, MdEditor, Divider
+  },
   name: "IndexView",
   mounted() {
     this.username = localStorage.getItem("username");
@@ -172,7 +173,8 @@ export default {
     }
   },
   methods: {
-    getArticles(callback = ()=>{}) {
+    getArticles(callback = () => {
+    }) {
       this.showLoading = true;
       getData().then((resp) => {
         this.articles = resp.data.data;
@@ -212,8 +214,14 @@ export default {
       this.showLoading = true;
     },
     finish() {
-      this.showLoading = false;
+      this.aid = 0;
       this.getArticles();
+      this.showLoading = false;
+    },
+    folderFinish() {
+      this.fid = 0;
+      this.getFolders();
+      this.showLoading = false;
     },
     clearText() {
       this.text = "";

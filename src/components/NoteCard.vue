@@ -100,10 +100,10 @@ export default {
   },
   methods: {
     del() {
+      this.$emit("start");
       deleteNote(this.aid).then(() => {
         this.$vaToast.init({message: '删除成功', color: 'success', closeable: false, duration: 3000});
         this.showDelete = false;
-        this.aid = 0;
         this.$emit("finish");
       })
     },

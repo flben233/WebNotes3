@@ -18,7 +18,6 @@
           个人中心
         </va-button>
         <br/>
-        <DarkModeButton/>
         <va-button preset="secondary" color="#000000" style="font-weight: normal;" @click="$emit('click-logout')">
           退出登录
         </va-button>

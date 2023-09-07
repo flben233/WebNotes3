@@ -23,3 +23,14 @@ export function deleteFolder(id) {
 export function allFolder() {
     return axios.get("/api/folder/all")
 }
+
+export function renameFolder(id, name) {
+    let formData = new FormData();
+    formData.append("id", id);
+    formData.append("name", name);
+    return axios({
+        url: '/api/folder/rename',
+        method: 'post',
+        data: formData
+    })
+}
