@@ -13,7 +13,6 @@
         <va-button preset="secondary" :color="themeColor" @click="showCreateFolder = false">
           关闭
         </va-button>
-        npm run
       </template>
     </va-modal>
 
@@ -33,7 +32,7 @@
               @select="handleSelect"
           />
           <div style="display: flex; justify-content: space-between; overflow: clip; ">
-            <va-button @click="showCreateFolder = !showCreateFolder" v-if="fid === 0" size="small" :color="themeColor"
+            <va-button @click="showCreateFolder = !showCreateFolder" size="small" :color="themeColor"
                        preset="secondary">
               <va-icon name="create_new_folder"/>
             </va-button>
@@ -132,7 +131,6 @@ export default {
       showLoading: false,
       folderName: '',
       themeColor: THEME_COLOR,
-      delFolder: false,
       selectedItem: null,
       previewOnly: false,
       preview: false,
@@ -215,8 +213,7 @@ export default {
     },
     finish() {
       this.aid = 0;
-      this.getArticles();
-      this.showLoading = false;
+      this.getArticles()
     },
     folderFinish() {
       this.fid = 0;
@@ -237,24 +234,34 @@ export default {
       }
     },
     create() {
-      createNote(this.text, this.fid).then(() => {
-        this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
+      createNote(this.text, this.fid).then((resp) => {
+        if (resp.data.code === 0) {
+          this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
+        } else {
+          this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
+        }
         this.getArticles(() => {
           this.aid = this.items[0].aid;
           this.clickCard(this.items[0]);
+          this.modified = false;
         });
       })
     },
     update() {
-      updateNotes(this.text, this.aid, this.fid).then(() => {
-        this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
+      updateNotes(this.text, this.aid, this.fid).then((resp) => {
+        if (resp.data.code === 0) {
+          this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
+        } else {
+          this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
+        }
         this.getArticles();
+        this.modified = false;
       })
     },
     imgAdd(files, callback) {
       this.showLoading = true;
       for (let file of files) {
-        uploadImg(file).then((resp) => {
+        uploadImg(file, this.aid).then((resp) => {
           callback(resp.data);
           this.showLoading = false;
         })
@@ -265,9 +272,9 @@ export default {
       createFolder(this.folderName).then((resp) => {
         if (resp.data.code === 0) {
           this.$vaToast.init({message: '创建成功', color: 'success', closeable: false, duration: 3000});
-          this.getArticles();
           this.showCreateFolder = false;
         }
+        this.getArticles();
       })
     },
     querySearchAsync(queryString, cb) {

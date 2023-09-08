@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export function uploadImg($file){
+export function uploadImg($file, aid){
     var formData = new FormData();
     formData.append('file', $file);
     return axios({
-        url: '/api/image/upload',
+        url: '/api/image/upload/' + aid.toString(),
         method: 'post',
         data: formData,
         headers: {'Content-Type': 'multipart/form-data' }
