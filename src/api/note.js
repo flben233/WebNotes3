@@ -45,9 +45,9 @@ export function createNote(article, folder) {
     })
 }
 
-export function getData() {
+export async function getData() {
     axios.defaults.withCredentials = true;
-    return axios({
+    return await axios({
         url: '/api/article/user',
         method: 'get',
         headers: {

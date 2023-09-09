@@ -171,30 +171,30 @@ export default {
     }
   },
   methods: {
-    getArticles(callback = () => {
-    }) {
+    async getArticles(callback = () => {}) {
       this.showLoading = true;
-      getData().then((resp) => {
-        this.articles = resp.data.data;
-        for (let item of this.articles) {
-          if (item.aid === this.aid) {
-            item.color = this.themeColor;
-            this.lastCard = item;
-          }
+      let resp = await getData();
+      if (resp.data.code === -6) {
+        this.$router.go("/login")
+      }
+      this.articles = resp.data.data;
+      for (let item of this.articles) {
+        if (item.aid === this.aid) {
+          item.color = this.themeColor;
+          this.lastCard = item;
         }
-        this.getFolders();
-        callback()
-        this.showLoading = false;
-      });
+      }
+      await this.getFolders();
+      callback()
+      this.showLoading = false;
     },
-    getFolders() {
-      allFolder().then((resp) => {
-        this.folders = [{name: "/", id: 0}]
-        for (let folder of resp.data.data) {
-          this.folders.push(folder);
-        }
-        this.articleFilter();
-      })
+    async getFolders() {
+      let resp = await allFolder();
+      this.folders = [{name: "/", id: 0}]
+      for (let folder of resp.data.data) {
+        this.folders.push(folder);
+      }
+      this.articleFilter();
     },
     articleFilter() {
       this.items = []
@@ -213,7 +213,7 @@ export default {
     },
     finish() {
       this.aid = 0;
-      this.getArticles()
+      this.getArticles();
     },
     folderFinish() {
       this.fid = 0;
@@ -237,14 +237,15 @@ export default {
       createNote(this.text, this.fid).then((resp) => {
         if (resp.data.code === 0) {
           this.$vaToast.init({message: '保存成功', color: 'success', closeable: false, duration: 3000});
+          this.getArticles(() => {
+            this.aid = this.items[0].aid;
+            this.clickCard(this.items[0]);
+            this.modified = false;
+          });
         } else {
           this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
+          this.showLoading = false;
         }
-        this.getArticles(() => {
-          this.aid = this.items[0].aid;
-          this.clickCard(this.items[0]);
-          this.modified = false;
-        });
       })
     },
     update() {
