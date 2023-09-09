@@ -74,7 +74,7 @@
 
 <script>
 import {ElAutocomplete} from 'element-plus'
-import {THEME_COLOR} from "@/common/final";
+import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
 import 'element-plus/es/components/autocomplete/style/css'
 import MdEditor from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
@@ -351,6 +351,14 @@ export default {
     onHtmlChange() {
       this.$nextTick(() => {
         let elements = document.getElementsByTagName("img");
+        let cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+          if (cookie.includes("satoken")) {
+            let saToken = cookie.split("=");
+            document.cookie = "satoken=" + saToken[1] + ";domain=." + ROOT_DOMAIN;
+            break;
+          }
+        }
         // 停止所有已发出的img请求
         if (elements.length > 0) {
           window.stop();
@@ -359,6 +367,7 @@ export default {
           element.setAttribute("loading", "lazy");
           // 刷新img
           element.setAttribute("src", element.src);
+          element.setAttribute("use-credentials", element.crossOrigin);
         }
         // 更新深色模式
         window.dispatchEvent(new Event("darkMode"));
