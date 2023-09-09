@@ -4,7 +4,16 @@ import {RouterView} from 'vue-router'
 export default {
   components: {RouterView},
   mounted() {
-    window.addEventListener("darkMode", (e) => {
+    window.addEventListener("darkMode", (e) => this.setDarkMode());
+    this.setDarkMode();
+  },
+  data() {
+    return {
+      theme: "default"
+    }
+  },
+  methods: {
+    setDarkMode() {
       let item = localStorage.getItem("dark");
       let htmlStyle = document.documentElement.style;
       let imgArr = document.getElementsByTagName("img");
@@ -21,11 +30,6 @@ export default {
           element.style.filter = element.style.filter.replaceAll("invert(100%) hue-rotate(180deg) contrast(100%)", "");
         }
       }
-    })
-  },
-  data() {
-    return {
-      theme: "default"
     }
   }
 }
