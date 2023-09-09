@@ -38,7 +38,7 @@ import {getArticleById} from "@/api/note";
 import MdEditor from "md-editor-v3";
 import {VaIcon} from "vuestic-ui";
 import Divider from "@/components/Divider.vue";
-import {THEME_COLOR} from "@/common/final";
+import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
 import DarkModeButton from "@/components/DarkModeButton.vue";
 
 const MdCatalog = MdEditor.MdCatalog;
@@ -77,10 +77,19 @@ export default {
         if (elements.length > 0) {
           window.stop();
         }
+        let cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+          if (cookie.includes("satoken")) {
+            let saToken = cookie.split("=");
+            document.cookie = "satoken=" + saToken[1] + ";domain=." + ROOT_DOMAIN;
+            break;
+          }
+        }
         for (let element of elements) {
           element.setAttribute("loading", "lazy");
           // 刷新img
           element.setAttribute("src", element.src);
+          element.setAttribute("use-credentials", element.crossOrigin);
         }
         // 更新深色模式
         window.dispatchEvent(new Event("darkMode"));
