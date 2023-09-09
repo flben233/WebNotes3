@@ -40,6 +40,7 @@ import {VaIcon} from "vuestic-ui";
 import Divider from "@/components/Divider.vue";
 import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
 import DarkModeButton from "@/components/DarkModeButton.vue";
+import {setImgElement} from "@/common/utils";
 
 const MdCatalog = MdEditor.MdCatalog;
 export default {
@@ -71,30 +72,7 @@ export default {
     handler() {
       this.scrollElement = document.getElementById("read");
       this.showCatalog = true;
-      this.$nextTick(() => {
-        let elements = document.getElementsByTagName("img");
-        // 停止所有已发出的img请求
-        if (elements.length > 0) {
-          window.stop();
-        }
-        let cookies = document.cookie.split(";");
-        for (let cookie of cookies) {
-          if (cookie.includes("satoken")) {
-            let saToken = cookie.split("=");
-            document.cookie = "satoken=" + saToken[1] + ";domain=." + ROOT_DOMAIN;
-            break;
-          }
-        }
-        for (let element of elements) {
-          element.setAttribute("loading", "lazy");
-          // 刷新img
-          element.setAttribute("src", element.src);
-          element.setAttribute("use-credentials", element.crossOrigin);
-        }
-        // 更新深色模式
-        window.dispatchEvent(new Event("darkMode"));
-        this.$forceUpdate();
-      })
+      this.$nextTick(() => setImgElement())
     },
     getNum(tag) {
       switch (tag) {
