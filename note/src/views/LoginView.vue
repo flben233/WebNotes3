@@ -47,7 +47,7 @@ export default {
     return {
       username: "",
       password: "",
-      remember: false,
+      remember: true,
       showLoading: false,
       themeColor: THEME_COLOR
     }

@@ -55,7 +55,7 @@
                         @finish="folderFinish"/>
           </div>
           <!--  列表渲染笔记  -->
-          <div style="overflow: scroll; overflow-x: hidden; max-height: 73vh;">
+          <div style="overflow: scroll; overflow-x: hidden; max-height: 73vh; scrollbar-width: none;">
             <NoteCard v-for="(item, index) in items" :item="item" :folders="folders" @click="clickCard(item)"
                       @start="start" @finish="finish"/>
           </div>
@@ -74,12 +74,11 @@
 
 <script>
 import {ElAutocomplete} from 'element-plus'
-import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
+import {THEME_COLOR} from "@/common/final";
 import 'element-plus/es/components/autocomplete/style/css'
 import MdEditor from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
-import {VaButton, VaCardContent, VaIcon, VaInput} from "vuestic-ui";
-import Divider from "../components/Divider.vue"
+import {VaButton, VaIcon, VaInput} from "vuestic-ui";
 import {logout} from "@/api/login"
 import {
   search,
@@ -89,20 +88,21 @@ import {
 } from "@/api/note";
 import {allFolder, createFolder} from "@/api/folder";
 import {uploadImg} from "@/api/image"
-import Title from "@/components/Title.vue";
 import NavBar from "@/components/NavBar.vue";
 import NoteCard from "@/components/NoteCard.vue";
 import FolderChip from "@/components/FolderChip.vue";
 import DarkModeButton from "@/components/DarkModeButton.vue";
 import {setImgElement} from "@/common/utils";
+import Title from "@/components/Title.vue";
 
 export default {
   components: {
+    Title,
     DarkModeButton,
     FolderChip,
-    NoteCard, NavBar, Title, VaInput, VaButton, VaIcon, VaCardContent, ElAutocomplete, MdEditor, Divider
+    NoteCard, NavBar, VaInput, VaButton, VaIcon, ElAutocomplete, MdEditor
   },
-  name: "IndexView",
+  name: "NoteView",
   mounted() {
     this.username = localStorage.getItem("username");
     this.getArticles();
@@ -140,7 +140,7 @@ export default {
       pageHeight: innerHeight,
       modified: false,
       sideBar: {
-        width: "25vw",
+        width: "20vw",
         marginTop: "2vh",
         marginLeft: "1vw"
       },
@@ -172,7 +172,8 @@ export default {
     }
   },
   methods: {
-    async getArticles(callback = () => {}) {
+    async getArticles(callback = () => {
+    }) {
       this.showLoading = true;
       let resp = await getData();
       if (resp.data.code === -6) {
@@ -286,9 +287,10 @@ export default {
       })
     },
     handleSelect(item) {
+      console.log(item)
       for (let item1 of this.items) {
-        if (item.aid === item1.aid) {
-          this.text = item1.article;
+        if (Number(item.aid) === item1.aid) {
+          this.clickCard(item1);
         }
       }
     },
