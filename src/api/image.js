@@ -18,3 +18,7 @@ export function deleteImg(imageName) {
 export function getImgList() {
     return axios.get("/api/image/query");
 }
+
+export function getQuota() {
+    return axios.get("/api/image/quota");
+}

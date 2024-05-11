@@ -21,35 +21,7 @@
           />
           <va-button @click="updateRole" style="margin-left: 10px">更新</va-button>
         </div>
-        <VaVirtualScroller
-            v-slot="{ item, index }"
-            :items="articles"
-            :wrapper-size="wrapperSize"
-        >
-          <VaList>
-            <VaListItem class="article-item">
-              <VaListItemSection>
-                <VaListItemLabel style="cursor: pointer;" @click="jump(item)">
-                  {{
-                    item.article.substring(0,
-                        item.article.indexOf("\n")).replaceAll("#", "")
-                  }}
-                </VaListItemLabel>
-
-                <VaListItemLabel
-                    caption
-                    :lines="3"
-                >
-                  {{ item.article }}
-                </VaListItemLabel>
-              </VaListItemSection>
-
-              <VaListItemSection icon>
-                <VaButton round icon="delete" color="danger" @click="delArticle(item.aid)"/>
-              </VaListItemSection>
-            </VaListItem>
-          </VaList>
-        </VaVirtualScroller>
+        <article-list :articles="articles" @del="delArticle" :wrapper-size="wrapperSize"/>
       </div>
     </div>
   </VaInnerLoading>
@@ -61,10 +33,11 @@ import NavBar from "@/components/NavBar.vue";
 import SideBar from "@/components/SideBar.vue";
 import AdminCard from "@/components/AdminCard.vue";
 import {delArticle, deleteUser, getArticleList, listUser, updateUserInfo} from "@/api/admin";
+import ArticleList from "@/components/ArticleList.vue";
 
 export default {
   name: "AdminView",
-  components: {AdminCard, SideBar, NavBar},
+  components: {ArticleList, AdminCard, SideBar, NavBar},
   mounted() {
     this.loadData();
   },
@@ -115,9 +88,6 @@ export default {
         this.loadData();
       });
     },
-    jump(article) {
-      open("http://" + location.host + '/article/' + article.aid)
-    },
     loadData() {
       this.loading = true;
       listUser().then(resp => {
@@ -150,9 +120,5 @@ export default {
   background: white;
   border-radius: 1rem;
   display: block;
-}
-
-.article-item {
-  margin-bottom: 20px;
 }
 </style>
