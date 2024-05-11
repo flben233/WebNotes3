@@ -21,11 +21,10 @@
     </div>
     <div id="main-read">
       <md-preview ref="reader"
-          id="read" :editor-id="'md-editor-v3'" v-model="text" @onHtmlChanged="handler"/>
+          id="read" :editor-id="'md-editor'" v-model="text" @onHtmlChanged="handler"/>
       <div id="catalog">
-        <MdCatalog :editor-id="'md-editor-v3'"
+        <MdCatalog :editor-id="'md-editor'"
                    style="text-overflow: ellipsis; max-width: 100%;"
-                   :scrollElement="scrollElement"
                    v-if="showCatalog"
         />
       </div>
@@ -102,9 +101,9 @@ export default {
   position: absolute;
   overflow-y: auto;
   width: 60vw;
-  padding: 5vw;
+  padding: 20px;
   max-height: 95%;
-  margin-left: 10%;
+  margin-left: 20vw;
   @media screen and (max-width: 1024px) {
     width: 90vw;
     margin-left: 5%;
@@ -117,7 +116,7 @@ export default {
 
 #catalog {
   overflow-y: auto;
-  margin-left: 75%;
+  margin-left: 85%;
   max-height: 95%;
   width: 20vw;
   padding-top: 2%;
