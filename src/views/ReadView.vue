@@ -20,8 +20,8 @@
       />
     </div>
     <div id="main-read">
-      <md-editor ref="reader"
-          id="read" :editor-id="'md-editor-v3'" v-model="text" previewOnly @onHtmlChanged="handler"/>
+      <md-preview ref="reader"
+          id="read" :editor-id="'md-editor-v3'" v-model="text" @onHtmlChanged="handler"/>
       <div id="catalog">
         <MdCatalog :editor-id="'md-editor-v3'"
                    style="text-overflow: ellipsis; max-width: 100%;"
@@ -35,17 +35,16 @@
 
 <script>
 import {getArticleById} from "@/api/note";
-import MdEditor from "md-editor-v3";
+import {MdCatalog, MdPreview} from "md-editor-v3";
 import {VaIcon} from "vuestic-ui";
 import Divider from "@/components/Divider.vue";
 import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
 import DarkModeButton from "@/components/DarkModeButton.vue";
 import {setImgElement} from "@/common/utils";
 
-const MdCatalog = MdEditor.MdCatalog;
 export default {
   name: "ReadView",
-  components: {DarkModeButton, Divider, VaIcon, MdEditor, MdCatalog},
+  components: {MdPreview, DarkModeButton, Divider, VaIcon, MdCatalog},
   mounted() {
     this.getText();
   },

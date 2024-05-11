@@ -16,13 +16,13 @@
       </template>
     </va-modal>
 
-    <NavBar :username="username" @click-left="sideChange" @click-logout="logoutBtn" @click-center="centerBtn"/>
+    <NavBar @click-left="sideChange" @click-logout="logoutBtn" @click-center="centerBtn"/>
 
     <va-progress-bar indeterminate :color="themeColor" :rounded="false" v-if="showLoading" size="small"/>
 
     <div id="content">
       <!--   显示笔记以及文件夹的侧边栏   -->
-      <div :style="sideBar" id="side">
+      <side-bar ref="sideBarRef">
         <div style="display: flex; flex-flow: column; height: 12vh; background-color: white;
                     border-radius: 1rem; padding: 1.2vh; margin-bottom: 1vh; justify-content: space-between; overflow: clip">
           <el-autocomplete
@@ -48,25 +48,25 @@
           </div>
         </div>
 
-        <div style="overflow: hidden; max-height: 77vh">
+        <div style="overflow: clip; max-height: 77vh">
           <!--    列表渲染文件夹    -->
           <div style="overflow: auto; margin-bottom: 1vh; height: 3vh; display: flex; align-items: center">
             <FolderChip v-for="(item, index) in folders" @click="selectFolder(item.id)" :item="item" @start="start"
                         @finish="folderFinish"/>
           </div>
           <!--  列表渲染笔记  -->
-          <div style="overflow: scroll; overflow-x: hidden; max-height: 73vh; scrollbar-width: none;">
+          <div style="overflow-y: scroll; overflow-x: hidden; max-height: 73vh; scrollbar-width: none; border-radius: 1rem">
             <NoteCard v-for="(item, index) in items" :item="item" :folders="folders" @click="clickCard(item)"
                       @start="start" @finish="finish"/>
           </div>
         </div>
-      </div>
+      </side-bar>
 
       <div class="mar"/>
       <!--   编辑器   -->
-      <md-editor ref="editor" v-if="showEditor" v-model="text" id="editor" :style="editor"
-                 @onSave="save" @onUploadImg="imgAdd" @onHtmlChanged="onHtmlChange" @onChange="modified = true"
-                 :preview-only="previewOnly" :preview="preview"/>
+      <md-editor ref="editor" v-if="showEditor && !previewOnly" v-model="text" :style="editor" @onSave="save" @onUploadImg="imgAdd"
+                 @onHtmlChanged="onHtmlChange" @onChange="onContentChange" :preview="preview" class="editor"/>
+      <md-preview v-if="showEditor && previewOnly" v-model="text" :style="editor" class="editor"/>
     </div>
   </div>
 
@@ -76,7 +76,7 @@
 import {ElAutocomplete} from 'element-plus'
 import {THEME_COLOR} from "@/common/final";
 import 'element-plus/es/components/autocomplete/style/css'
-import MdEditor from 'md-editor-v3';
+import {MdEditor, MdPreview} from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import {VaButton, VaIcon, VaInput} from "vuestic-ui";
 import {logout} from "@/api/login"
@@ -94,9 +94,12 @@ import FolderChip from "@/components/FolderChip.vue";
 import DarkModeButton from "@/components/DarkModeButton.vue";
 import {setImgElement} from "@/common/utils";
 import Title from "@/components/Title.vue";
+import SideBar from "@/components/SideBar.vue";
 
 export default {
   components: {
+    SideBar,
+    MdPreview,
     Title,
     DarkModeButton,
     FolderChip,
@@ -104,7 +107,6 @@ export default {
   },
   name: "NoteView",
   mounted() {
-    this.username = localStorage.getItem("username");
     this.getArticles();
     this.setSideSize();
     this.$refs.editor.on("preview", this.onHtmlChange);
@@ -125,7 +127,6 @@ export default {
       input: '',
       text: '',
       lastCard: null,
-      username: '',
       aid: 0,
       fid: 0,
       showCreateFolder: false,
@@ -139,27 +140,22 @@ export default {
       showSwitch: false,
       pageHeight: innerHeight,
       modified: false,
-      sideBar: {
-        width: "20vw",
-        marginTop: "2vh",
-        marginLeft: "1vw"
-      },
-      sideBarMin: {
-        width: "0",
-        marginLeft: "0",
-        marginTop: "2vh",
-        height: "100%"
-      },
-      sideBarMobile: {
-        marginTop: "2vh",
-        width: "96vw",
-        marginLeft: "2vw"
-      },
+      clicked: false,
+
       editor: {
         height: "90vh",
+        width: "81vw",
         border: "transparent",
         marginTop: "2vh",
         marginRight: "1vw",
+        borderRadius: "1rem"
+      },
+      editorMobile: {
+        height: "90vh",
+        width: "96vw",
+        border: "transparent",
+        marginTop: "2vh",
+        marginRight: "2vw",
         borderRadius: "1rem"
       },
       editorMin: {
@@ -261,14 +257,50 @@ export default {
         this.modified = false;
       })
     },
+    async uploadImage(files, callback) {
+      this.showLoading = true;
+      if (this.aid === 0) {
+        let resp = await createNote(this.text, this.fid);
+        if (resp.data.code === 0) {
+          await this.getArticles();
+          this.aid = this.items[0].aid;
+          this.clickCard(this.items[0]);
+          this.modified = false;
+        } else {
+          this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
+          this.showLoading = false;
+          return;
+        }
+      }
+      for (let file of files) {
+        let resp = await uploadImg(file, this.aid);
+        callback(resp.data);
+      }
+      this.showLoading = false;
+    },
     imgAdd(files, callback) {
       this.showLoading = true;
-      for (let file of files) {
-        uploadImg(file, this.aid).then((resp) => {
-          callback(resp.data);
-          this.showLoading = false;
-        })
-      }
+      this.uploadImage(files, callback);
+      // if (this.aid === 0) {
+      //   createNote(this.text, this.fid).then((resp) => {
+      //     if (resp.data.code === 0) {
+      //       this.getArticles(() => {
+      //         this.aid = this.items[0].aid;
+      //         this.clickCard(this.items[0]);
+      //         this.modified = false;
+      //       });
+      //     } else {
+      //       this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
+      //       this.showLoading = false;
+      //     }
+      //   })
+      // }
+      // for (let file of files) {
+      //   uploadImg(file, this.aid).then((resp) => {
+      //     callback(resp.data);
+      //     this.showLoading = false;
+      //   })
+      // }
     },
     createNewFolder() {
       this.showLoading = true;
@@ -303,20 +335,14 @@ export default {
       this.text = item.article;
       this.aid = item.aid;
       this.selectedItem = item;
+      this.clicked = true;
       if (innerWidth < 1024) {
         this.sideChange();
       }
     },
     sideChange() {
-      this.minimized = !this.minimized;
-      if (this.minimized) {
-        this.sideBar = this.sideBarMin;
-        this.editor = JSON.parse(this.editorStyle);
-      } else {
-        this.sideBar = JSON.parse(this.sideBarStyle);
-        if (innerWidth < 1024)
-          this.editor = this.editorMin;
-      }
+      this.$refs.sideBarRef.toggleSideBar();
+      this.editor.width = "100%";
     },
     logoutBtn() {
       logout().then(() => {
@@ -330,14 +356,10 @@ export default {
     },
     setSideSize() {
       if (innerWidth < 1024) {
-        this.showSwitch = true;
-        this.sideBar = this.sideBarMobile;
-        this.editorStyle = JSON.stringify(this.editor);
-        this.sideBarStyle = JSON.stringify(this.sideBar);
+        this.editorStyle = JSON.stringify(this.editorMobile);
         this.editor = this.editorMin;
       } else {
         this.editorStyle = JSON.stringify(this.editor);
-        this.sideBarStyle = JSON.stringify(this.sideBar);
         this.preview = true;
         this.refreshEditor();
       }
@@ -353,6 +375,13 @@ export default {
     },
     onHtmlChange() {
       this.$nextTick(() => setImgElement())
+    },
+    onContentChange() {
+      if (this.clicked) {
+        this.clicked = false;
+      } else {
+        this.modified = true;
+      }
     }
   }
 }
@@ -404,15 +433,10 @@ export default {
   display: flex;
 }
 
-#editor {
+.editor {
   @media screen and (max-width: 1024px) {
     padding: 10px;
   }
-  transition: all 0.5s;
-}
-
-#side {
-  overflow: clip;
   transition: all 0.5s;
 }
 

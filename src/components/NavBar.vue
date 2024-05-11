@@ -32,8 +32,15 @@ import DarkModeButton from "@/components/DarkModeButton.vue";
 export default {
   name: "NavBar",
   components: {DarkModeButton},
-  props: ['username'],
-  emits: ['click-left', 'click-logout', 'click-center']
+  emits: ['click-left', 'click-logout', 'click-center'],
+  mounted() {
+    this.username = localStorage.getItem("username");
+  },
+  data() {
+    return {
+      username: ""
+    }
+  }
 }
 </script>
 
