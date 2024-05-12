@@ -4,23 +4,42 @@
   <meta charset="UTF-8">
   <title>小雨笔记 - LightNotes by.ShirakawaTyu</title>
 </head>
-<body id="main-index">
-  <img class="circle-container" src="https://img2.imgtp.com/2024/05/11/RUdZCloP.jpg"/>
-  <div style="margin-top: 1rem; color: #f0f0f0">Life is like Ephemera in the world, a drop in the sea</div>
-  <hr class="divider"/>
-  <a href="/note" class="href">进入笔记</a>
+<body>
+<div id="container">
+  <div id="main-index">
+    <img class="circle-container" src="/avatar.jpg"/>
+    <div class="sentence">Life is like Ephemera in the world, a drop in the sea</div>
+    <hr class="divider"/>
+    <a href="/note" class="href">进入笔记</a>
+  </div>
+</div>
 </body>
 <style>
+  body {
+    background: url("/bg.webp");
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(8px);
+    margin: 0;
+  }
+  .sentence {
+    margin-top: 1rem;
+    color: #f0f0f0;
+  }
+  #container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: clip
+  }
   #main-index {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 98vh;
-    background: url("https://krseoul.imgtbl.com/i/2024/05/05/663771bd43ed4.webp");
-    background-size: cover;
-    background-position: center;
-    backdrop-filter: blur(5px);
+    height: 100%;
+    @media screen and (max-width: 1024px) {
+      transform: scale(1.8);
+    }
   }
   .divider {
     border: 0;
