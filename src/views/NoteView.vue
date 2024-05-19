@@ -40,7 +40,7 @@
               <va-icon name="create"/>
             </va-button>
             <DarkModeButton/>
-            <va-switch v-if="showSwitch" v-model="previewOnly" @click="refreshEditor" :color="themeColor">
+            <va-switch v-if="showSwitch" v-model="previewOnly" :color="themeColor">
               <template #innerLabel>
                 <va-icon name="visibility" :color="themeColor"/>
               </template>
@@ -64,9 +64,9 @@
 
       <div class="mar"/>
       <!--   编辑器   -->
-      <md-editor ref="editor" v-if="showEditor && !previewOnly" v-model="text" :style="editor" @onSave="save" @onUploadImg="imgAdd"
+      <md-editor ref="editor" v-if="!previewOnly" v-model="text" :style="editor" @onSave="save" @onUploadImg="imgAdd"
                  @onHtmlChanged="onHtmlChange" @onChange="onContentChange" :preview="preview" class="editor"/>
-      <md-preview v-if="showEditor && previewOnly" v-model="text" :style="editor" class="editor"/>
+      <md-preview v-if="previewOnly" v-model="text" :style="editor" class="editor"/>
     </div>
   </div>
 
@@ -80,12 +80,7 @@ import {MdEditor, MdPreview} from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import {VaButton, VaIcon, VaInput} from "vuestic-ui";
 import {logout} from "@/api/login"
-import {
-  search,
-  getData,
-  createNote,
-  updateNotes
-} from "@/api/note";
+import {search, getData, createNote, updateNotes} from "@/api/note";
 import {allFolder, createFolder} from "@/api/folder";
 import {uploadImg} from "@/api/image"
 import NavBar from "@/components/NavBar.vue";
@@ -108,8 +103,12 @@ export default {
   name: "NoteView",
   mounted() {
     this.getArticles();
-    this.setSideSize();
     this.$refs.editor.on("preview", this.onHtmlChange);
+    if (innerWidth < 1024) {
+      this.showSwitch = true;
+      this.editor = this.editorMobile;
+      this.toggleEditor();
+    }
     window.addEventListener("beforeunload", (e) => {
       if (this.modified) {
         e.preventDefault();
@@ -120,7 +119,6 @@ export default {
   },
   data() {
     return {
-      minimized: false,
       items: [],
       articles: [],
       folders: [],
@@ -136,7 +134,6 @@ export default {
       selectedItem: null,
       previewOnly: false,
       preview: false,
-      showEditor: true,
       showSwitch: false,
       pageHeight: innerHeight,
       modified: false,
@@ -152,7 +149,7 @@ export default {
       },
       editorMobile: {
         height: "90vh",
-        width: "96vw",
+        width: "100%",
         border: "transparent",
         marginTop: "2vh",
         marginRight: "2vw",
@@ -168,8 +165,7 @@ export default {
     }
   },
   methods: {
-    async getArticles(callback = () => {
-    }) {
+    async getArticles(callback = () => {}) {
       this.showLoading = true;
       let resp = await getData();
       if (resp.data.code === -6) {
@@ -280,26 +276,6 @@ export default {
     imgAdd(files, callback) {
       this.showLoading = true;
       this.uploadImage(files, callback);
-      // if (this.aid === 0) {
-      //   createNote(this.text, this.fid).then((resp) => {
-      //     if (resp.data.code === 0) {
-      //       this.getArticles(() => {
-      //         this.aid = this.items[0].aid;
-      //         this.clickCard(this.items[0]);
-      //         this.modified = false;
-      //       });
-      //     } else {
-      //       this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
-      //       this.showLoading = false;
-      //     }
-      //   })
-      // }
-      // for (let file of files) {
-      //   uploadImg(file, this.aid).then((resp) => {
-      //     callback(resp.data);
-      //     this.showLoading = false;
-      //   })
-      // }
     },
     createNewFolder() {
       this.showLoading = true;
@@ -341,7 +317,7 @@ export default {
     },
     sideChange() {
       this.$refs.sideBarRef.toggleSideBar();
-      this.editor.width = "100%";
+      this.toggleEditor();
     },
     logoutBtn() {
       logout().then(() => {
@@ -353,24 +329,22 @@ export default {
       this.showLoading = true;
       this.$router.push("/center")
     },
-    setSideSize() {
+    toggleEditor() {
       if (innerWidth < 1024) {
-        this.editorStyle = JSON.stringify(this.editorMobile);
-        this.editor = this.editorMin;
+        if (this.editor.width !== "0") {
+          this.editorStyle = JSON.stringify(this.editor);
+          this.editor = this.editorMin;
+        } else {
+          this.editor = JSON.parse(this.editorStyle);
+        }
       } else {
-        this.editorStyle = JSON.stringify(this.editor);
-        this.preview = true;
-        this.refreshEditor();
+        if (this.editor.width !== "100%") {
+          this.editorStyle = JSON.stringify(this.editor);
+          this.editor.width = "100%"
+        } else {
+          this.editor = JSON.parse(this.editorStyle);
+        }
       }
-    },
-    refreshEditor() {
-      this.showEditor = false;
-      if (innerWidth < 1024) {
-        this.preview = this.previewOnly;
-      }
-      this.$nextTick(() => {
-        this.showEditor = true;
-      })
     },
     onHtmlChange() {
       this.$nextTick(() => setImgElement())
