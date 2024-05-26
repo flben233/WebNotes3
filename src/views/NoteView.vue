@@ -269,7 +269,7 @@ export default {
       }
       await this.getArticles();
       this.aid = this.items[0].aid;
-      this.clickCard(this.items[0]);
+      // this.clickCard(this.items[0]);
       this.modified = false;
       this.showLoading = false;
     },
