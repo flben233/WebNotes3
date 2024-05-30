@@ -40,7 +40,7 @@
 </template>
 <script>
 import {login} from "@/api/login"
-import {THEME_COLOR} from "@/common/final";
+import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
 
 export default {
   data() {
