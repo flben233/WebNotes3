@@ -257,6 +257,9 @@ export default {
       this.showLoading = true;
       if (this.aid === 0) {
         let resp = await createNote(this.text, this.fid);
+        await this.getArticles();
+        this.aid = this.items[0].aid;
+        this.clickCard(this.items[0]);
         if (resp.data.code !== 0) {
           this.$vaToast.init({message: '保存失败', color: 'danger', closeable: false, duration: 3000});
           this.showLoading = false;
@@ -267,9 +270,6 @@ export default {
         let resp = await uploadImg(file, this.aid);
         callback(resp.data);
       }
-      await this.getArticles();
-      this.aid = this.items[0].aid;
-      // this.clickCard(this.items[0]);
       this.modified = false;
       this.showLoading = false;
     },
