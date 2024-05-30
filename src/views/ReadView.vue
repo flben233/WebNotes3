@@ -101,9 +101,9 @@ export default {
   position: absolute;
   overflow-y: auto;
   width: 60vw;
-  padding: 20px;
+  padding: 1rem;
   max-height: 95%;
-  margin-left: 20vw;
+  margin-left: 30vw;
   @media screen and (max-width: 1024px) {
     width: 90vw;
     margin-left: 5%;
@@ -116,9 +116,9 @@ export default {
 
 #catalog {
   overflow-y: auto;
-  margin-left: 85%;
+  margin-left: 2vw;
   max-height: 95%;
-  width: 20vw;
+  width: 18vw;
   padding-top: 2%;
   padding-bottom: 2%;
   position: absolute;

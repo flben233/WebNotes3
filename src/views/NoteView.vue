@@ -24,7 +24,7 @@
       <!--   显示笔记以及文件夹的侧边栏   -->
       <side-bar ref="sideBarRef">
         <div style="display: flex; flex-flow: column; height: 12vh; background-color: white;
-                    border-radius: 1rem; padding: 1.2vh; margin-bottom: 1vh; justify-content: space-between; overflow: clip">
+                    border-radius: 1rem; padding: 0.75rem; justify-content: space-between; overflow: clip">
           <el-autocomplete
               v-model="input"
               :fetch-suggestions="querySearchAsync"
@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <div style="overflow: clip; max-height: 77vh">
+        <div style="overflow: clip; max-height: 77vh; margin-top: 1vh;">
           <!--    列表渲染文件夹    -->
           <div style="overflow: auto; margin-bottom: 1vh; height: 3vh; display: flex; align-items: center">
             <FolderChip v-for="(item, index) in folders" @click="selectFolder(item.id)" :item="item" @start="start"
@@ -133,7 +133,7 @@ export default {
       themeColor: THEME_COLOR,
       selectedItem: null,
       previewOnly: false,
-      preview: false,
+      preview: true,
       showSwitch: false,
       pageHeight: innerHeight,
       modified: false,
