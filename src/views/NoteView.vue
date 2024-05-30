@@ -266,6 +266,7 @@ export default {
           return;
         }
       }
+      this.showLoading = true;
       for (let file of files) {
         let resp = await uploadImg(file, this.aid);
         callback(resp.data);
