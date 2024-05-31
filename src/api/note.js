@@ -47,15 +47,41 @@ export function createNote(article, folder) {
 
 export async function getData() {
     axios.defaults.withCredentials = true;
-    return await axios({
-        url: '/api/article/user',
+    let lastUpdate = await axios({
+        url: '/api/article/time',
         method: 'get',
-        headers: {
-            'Content-Type': "application/json;charset=utf-8",
-            'Access-Control-Allow-Credentials':"true"
-        },
         withCredentials: true
-    })
+    });
+    let current = localStorage.getItem("updateTime");
+    let dataUrl = "/api/article/user";
+    let cache = await caches.open("article")
+    let response = await cache.match(dataUrl)
+    if (response != null && current != null && Number(current) === lastUpdate.data.data) {
+        console.log(response);
+        return response.json();
+    } else {
+        let data = await axios({
+            url: dataUrl,
+            method: 'get',
+            headers: {
+                'Content-Type': "application/json;charset=utf-8",
+                'Access-Control-Allow-Credentials': "true"
+            },
+            withCredentials: true
+        });
+        await cache.put(dataUrl, new Response(JSON.stringify(data)));
+        localStorage.setItem("updateTime", lastUpdate.data.data);
+        return data;
+    }
+    // return axios({
+    //     url: '/api/article/user',
+    //     method: 'get',
+    //     headers: {
+    //         'Content-Type': "application/json;charset=utf-8",
+    //         'Access-Control-Allow-Credentials': "true"
+    //     },
+    //     withCredentials: true
+    // });
 }
 
 export function updateNotes(article, aid, folder) {
