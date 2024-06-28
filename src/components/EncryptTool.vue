@@ -11,6 +11,7 @@ export default {
     return {
       showDecryptModal: false,
       showEncryptModal: false,
+      showPwd: false,
       error: false,
       password: '',
       text: '',
@@ -128,7 +129,7 @@ export default {
       <template #header>
         <Title>解密</Title>
       </template>
-      <va-input v-model="password" placeholder="请输入密码" :color="themeColor" type="password" :error="error"/>
+      <va-input v-model="password" placeholder="请输入密码" :color="themeColor" :error="error"/>
       <template #footer>
         <va-button :color="themeColor" text-color="#ffffff" @click="decrypt" style="margin-right: 20px">
           提交
@@ -143,7 +144,9 @@ export default {
       <template #header>
         <Title>加密</Title>
       </template>
-      <va-input v-model="password" placeholder="请输入密码" :color="themeColor" type="password"/>
+      <va-hover v-model="showPwd">
+        <va-input v-model="password" placeholder="请设置密码" :color="themeColor" :type="showPwd ? 'text' : 'password'"/>
+      </va-hover>
       <template #footer>
         <va-button :color="themeColor" text-color="#ffffff" @click="encrypt" style="margin-right: 20px">
           提交
