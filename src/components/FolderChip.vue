@@ -30,7 +30,7 @@
     <va-dropdown trigger="right-click">
       <template #anchor>
         <va-chip size="small"
-                 :style="{marginRight: '5px', fontSize: 'x-small', transform: 'scale(' + (pageHeight * 0.03 / 28.0).toString() + ')'}"
+                 :style="{whiteSpace: 'nowrap', marginRight: '5px', fontSize: 'x-small', transform: 'scale(' + (pageHeight * 0.03 / 28.0).toString() + ')'}"
                  :color="themeColor" outline>
           {{ item.name }}
         </va-chip>

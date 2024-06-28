@@ -1,5 +1,6 @@
 <template>
   <div style="background-color: white; height: 100vh; width: 100vw;">
+    <EncryptTool ref="enpTool" v-model="text"/>
     <div style="padding: 0.5%; height: 5vh; display: flex; align-items: center; justify-content: space-between">
       <div>
         <va-icon name="person"/>
@@ -40,10 +41,11 @@ import Divider from "@/components/Divider.vue";
 import {ROOT_DOMAIN, THEME_COLOR} from "@/common/final";
 import DarkModeButton from "@/components/DarkModeButton.vue";
 import {setImgElement} from "@/common/utils";
+import EncryptTool from "@/components/EncryptTool.vue";
 
 export default {
   name: "ReadView",
-  components: {MdPreview, DarkModeButton, Divider, VaIcon, MdCatalog},
+  components: {EncryptTool, MdPreview, DarkModeButton, Divider, VaIcon, MdCatalog},
   mounted() {
     this.getText();
   },
@@ -61,11 +63,11 @@ export default {
     }
   },
   methods: {
-    getText() {
-      getArticleById(this.$route.params.aid).then((response) => {
-        this.text = response.data.data.article;
-        this.username = response.data.data.username;
-      })
+    async getText() {
+      let response = await getArticleById(this.$route.params.aid);
+      this.text = response.data.data.article;
+      await this.$nextTick(() => this.$refs.enpTool.useDecrypt());
+      this.username = response.data.data.username;
     },
     handler() {
       this.scrollElement = document.getElementById("read");

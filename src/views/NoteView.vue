@@ -1,21 +1,8 @@
 <template>
   <div id="index">
-    <!--  创建文件夹的窗口  -->
-    <va-modal v-model="showCreateFolder" hide-default-actions>
-      <template #header>
-        <Title>新文件夹名</Title>
-      </template>
-      <va-input v-model="folderName" :color="themeColor"></va-input>
-      <template #footer>
-        <va-button :color="themeColor" text-color="#ffffff" @click="createNewFolder" style="margin-right: 20px">
-          提交
-        </va-button>
-        <va-button preset="secondary" :color="themeColor" @click="showCreateFolder = false">
-          关闭
-        </va-button>
-      </template>
-    </va-modal>
-
+    <InputModal v-model:show="showCreateFolder" title="新文件夹名" v-model:input="folderName" @apply="createNewFolder"
+                @close="showCreateFolder = false"/>
+    <EncryptTool ref="enpTool" v-model="text"/>
     <NavBar @click-left="sideChange" @click-logout="logoutBtn" @click-center="centerBtn"/>
 
     <va-progress-bar indeterminate :color="themeColor" :rounded="false" v-if="showLoading" size="small"/>
@@ -31,13 +18,16 @@
               placeholder="    请输入关键词查找"
               @select="handleSelect"
           />
-          <div style="display: flex; justify-content: space-between; overflow: clip; ">
+          <div style="display: flex; justify-content: space-between; overflow: auto; scrollbar-width: thin;">
             <va-button @click="showCreateFolder = !showCreateFolder" size="small" :color="themeColor"
                        preset="secondary">
               <va-icon name="create_new_folder"/>
             </va-button>
             <va-button @click="clearText" size="small" :color="themeColor" preset="secondary">
               <va-icon name="create"/>
+            </va-button>
+            <va-button @click="encrypt" size="small" :color="themeColor" preset="secondary">
+              <va-icon name="lock"/>
             </va-button>
             <DarkModeButton/>
             <va-switch v-if="showSwitch" v-model="previewOnly" :color="themeColor">
@@ -48,9 +38,9 @@
           </div>
         </div>
 
-        <div style="overflow: clip; max-height: 77vh; margin-top: 1vh;">
+        <div style="overflow: clip; max-height: 77vh; margin-top: 1vh; max-width: 100%">
           <!--    列表渲染文件夹    -->
-          <div style="overflow: auto; margin-bottom: 1vh; height: 3vh; display: flex; align-items: center">
+          <div style="overflow: auto; margin-bottom: 1vh; ; display: flex; align-items: center; scrollbar-width: thin;">
             <FolderChip v-for="(item, index) in folders" @click="selectFolder(item.id)" :item="item" @start="start"
                         @finish="folderFinish"/>
           </div>
@@ -90,14 +80,18 @@ import DarkModeButton from "@/components/DarkModeButton.vue";
 import {setImgElement} from "@/common/utils";
 import Title from "@/components/Title.vue";
 import SideBar from "@/components/SideBar.vue";
+import EncryptTool from "@/components/EncryptTool.vue";
+import InputModal from "@/components/InputModal.vue";
 
 export default {
   components: {
+    InputModal,
     SideBar,
     MdPreview,
     Title,
     DarkModeButton,
     FolderChip,
+    EncryptTool,
     NoteCard, NavBar, VaInput, VaButton, VaIcon, ElAutocomplete, MdEditor
   },
   name: "NoteView",
@@ -280,6 +274,7 @@ export default {
     },
     createNewFolder() {
       this.showLoading = true;
+      console.log(this.folderName)
       createFolder(this.folderName).then((resp) => {
         if (resp.data.code === 0) {
           this.$vaToast.init({message: '创建成功', color: 'success', closeable: false, duration: 3000});
@@ -309,12 +304,17 @@ export default {
       item.color = this.themeColor;
       this.lastCard = item;
       this.text = item.article;
+      this.$nextTick(() => this.$refs.enpTool.useDecrypt());
+      // ;
       this.aid = item.aid;
       this.selectedItem = item;
       this.clicked = true;
       if (innerWidth < 1024) {
         this.sideChange();
       }
+    },
+    encrypt() {
+      this.$refs.enpTool.useEncrypt();
     },
     sideChange() {
       this.$refs.sideBarRef.toggleSideBar();
@@ -362,22 +362,7 @@ export default {
 </script>
 
 <style>
-::-webkit-scrollbar {
-  width: 0;
-  padding-right: 2px;
-}
 
-::-webkit-scrollbar-track {
-  background: rgb(239, 239, 239);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #908f8f;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #b9b9b9;
-}
 
 #index {
   width: 100vw;
