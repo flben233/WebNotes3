@@ -290,7 +290,8 @@ export default {
       })
     },
     handleSelect(item) {
-      console.log(item)
+      console.log(item);
+      this.selectFolder(item.folder);
       for (let item1 of this.items) {
         if (Number(item.aid) === item1.aid) {
           this.clickCard(item1);
