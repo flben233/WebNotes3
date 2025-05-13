@@ -52,8 +52,7 @@
                  class="card"
         >
           <div v-if="item.folder !== -1">
-            <Title style="padding: 20px 20px 0 20px">{{ item.article.substring(0,
-              item.article.indexOf("\n")).replaceAll("#", "") }}</Title>
+            <Title style="padding: 20px 20px 0 20px">{{ getTitle(item) }}</Title>
             <va-card-content style="padding-top: 10px">
               <p class="text">
                 {{
@@ -125,6 +124,20 @@ export default {
           }
         })
       }
+    },
+    getTitle(item) {
+      let lines = item.article.split("\n");
+      let title = lines[0].replaceAll("#", "");
+      const isComment = (str) => str.indexOf("<!--") === 0 && str.indexOf("-->") > 0;
+      if (isComment(title)) {
+        for (const l of lines) {
+          if (!isComment(l)) {
+            title = l.replaceAll("#", "");
+            break;
+          }
+        }
+      }
+      return title;
     }
   }
 }
