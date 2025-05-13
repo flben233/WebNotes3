@@ -1,0 +1,36 @@
+note.shirakawatyu.top {
+  encode {
+    zstd
+    # gzip 9
+  }
+  handle /api/* {
+    reverse_proxy backend:8081
+  }
+  handle /note* {
+    root * /www
+    try_files {path} /index.html
+    file_server
+  }
+  handle /assets/* {
+    root * /www
+    file_server
+  }
+  @static {
+    path_regexp ^/[A-Za-z0-9/]+\.[A-Za-z0-9]+
+  }
+  handle @static {
+    root * /www
+    file_server
+  }
+  @note {
+    path_regexp /[A-Za-z0-9/]+
+  }
+  handle @note {
+    redir @note /note{uri}
+  }
+  handle {
+    root * /www/static_index
+    try_files {path} /index.html
+    file_server
+  }
+}

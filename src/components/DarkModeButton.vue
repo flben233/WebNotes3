@@ -24,7 +24,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="dark-switch">
     <va-switch
         v-model="dark"
         :color="themeColor"
@@ -47,5 +47,7 @@ export default {
 </template>
 
 <style scoped>
-
+  .dark-switch {
+    overflow: hidden;
+  }
 </style>
