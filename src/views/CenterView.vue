@@ -31,7 +31,7 @@
             <va-card-content style="height: 6vh">
               {{panelName}}
             </va-card-content>
-            <va-card-content style="height: 82vh">
+            <va-card-content style="height: 82vh; width: calc(100vw - var(--va-card-padding))">
               <article-list :articles="list" :del-article="shareCancel" :wrapper-size="wrapperSize"/>
             </va-card-content>
           </va-list>
