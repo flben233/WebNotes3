@@ -131,7 +131,7 @@ export default {
       const isComment = (str) => str.indexOf("<!--") === 0 && str.indexOf("-->") > 0;
       if (isComment(title)) {
         for (const l of lines) {
-          if (!isComment(l)) {
+          if (l.length > 0 && !isComment(l)) {
             title = l.replaceAll("#", "");
             break;
           }
