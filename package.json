@@ -19,11 +19,12 @@
   },
   "devDependencies": {
     "@types/marked": "^4.0.8",
-    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-vue": "^5.1.0",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
     "unplugin-element-plus": "^0.4.1",
-    "vite": "^5.0.12",
+    "unplugin-vue-components": "^0.27.3",
+    "v---ite": "^5.3.5",
     "vue-cli-plugin-vuestic-ui": "~1.0.11"
   }
 }

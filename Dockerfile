@@ -1,3 +1,3 @@
-FROM caddy
-ADD dist /www
-COPY Caddyfile /etc/caddy/Caddyfile
+FROM scratch
+COPY dist/ /www
+CMD cp /www/* /host
