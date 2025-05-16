@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build && xcopy /E /I static_index dist\\static_index",
+    "build": "vite build && cp -r static_index dist/",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "dev": "vite --host",
     "preview": "vite preview"
