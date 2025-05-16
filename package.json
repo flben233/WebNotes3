@@ -24,7 +24,7 @@
     "eslint-plugin-vue": "^9.3.0",
     "unplugin-element-plus": "^0.4.1",
     "unplugin-vue-components": "^0.27.3",
-    "v---ite": "^5.3.5",
+    "vite": "^5.3.5",
     "vue-cli-plugin-vuestic-ui": "~1.0.11"
   }
 }
