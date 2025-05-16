@@ -1,3 +1,3 @@
 FROM alpine
 COPY dist/ /www
-CMD cp /www/* /host
+CMD cp -r /www/* /host
